@@ -10,9 +10,8 @@ async function main() {
   const registry = await KnowledgeRegistry.deploy();
   
   // Wait for deployment
-  const deploymentTx = registry.deployTransaction;
-  const receipt = await deploymentTx.wait();
-  const contractAddress = receipt.contractAddress;
+  await registry.waitForDeployment();
+  const contractAddress = await registry.getAddress();
 
   console.log(`KnowledgeRegistry deployed to: ${contractAddress}`);
 
