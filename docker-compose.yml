@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # Frontend Service (React App)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Habilita hot-reloading em ambientes Docker
+    depends_on:
+      - backend
+
+  # Backend Service (Node.js API)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '3001:3001'
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - hardhat
+      - ipfs
+
+  # Blockchain Service (Hardhat Local Node)
+  hardhat:
+    build:
+      context: ./blockchain
+      dockerfile: Dockerfile
+    ports:
+      - '8545:8545' # Porta RPC do Ethereum
+
+  # Decentralized Storage Service (IPFS)
+  ipfs:
+    image: ipfs/kubo:latest
+    ports:
+      - '8080:8080' # IPFS Gateway
+      - '5001:5001' # IPFS API
+    volumes:
+      - ipfs_data:/data/ipfs
+
+volumes:
+  ipfs_data:
