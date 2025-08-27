@@ -1,6 +1,4 @@
-refactor: Convert project to single-container architecture
+fix: Attempt to install glibc for IPFS compatibility
 
-- Replaced docker-compose with a single root Dockerfile.
-- Introduced Supervisor for internal process management (backend, hardhat, ipfs).
-- Updated backend to serve the static frontend build.
-- Updated documentation (README, UNRAID_INSTRUCTIONS) to reflect the new architecture.
+- Added glibc installation steps to Dockerfile.
+- Debugging persistent 'ENOENT' error for IPFS binary.

@@ -38,4 +38,15 @@ contract KnowledgeRegistry {
 
         emit KnowledgeRegistered(newId, _ipfsHash, _communityId, msg.sender);
     }
-}
+
+    /**
+     * @dev Returns all registered knowledge records.
+     * @return An array of all records.
+     */
+    function getAllRecords() public view returns (KnowledgeRecord[] memory) {
+        KnowledgeRecord[] memory allRecords = new KnowledgeRecord[](_recordCounter);
+        for (uint i = 0; i < _recordCounter; i++) {
+            allRecords[i] = records[i];
+        }
+        return allRecords;
+    }

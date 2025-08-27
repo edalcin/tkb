@@ -18,13 +18,20 @@ RUN npm run build
 FROM node:18-alpine
 
 # Install dependencies: Supervisor for process management, wget to download IPFS
-RUN apk add --no-cache supervisor wget tar
+RUN apk add --no-cache supervisor python3 build-base libc-utils
+
+# Install glibc for IPFS compatibility
+RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
+    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.39-r0/glibc-2.39-r0.apk -O /tmp/glibc.apk && \
+    apk add --no-cache /tmp/glibc.apk && \
+    rm /tmp/glibc.apk
 
 # Install IPFS (Kubo)
 ENV KUBO_VERSION=v0.23.0
 RUN wget https://dist.ipfs.tech/kubo/${KUBO_VERSION}/kubo_${KUBO_VERSION}_linux-amd64.tar.gz -O /tmp/kubo.tar.gz && \
     tar -xvzf /tmp/kubo.tar.gz -C /tmp && \
     mv /tmp/kubo/ipfs /usr/local/bin/ipfs && \
+    chmod +x /usr/local/bin/ipfs && \
     rm -rf /tmp/kubo.tar.gz /tmp/kubo
 
 # Set up application directory
@@ -47,28 +54,8 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN mkdir -p /data/ipfs /var/log/supervisor
 ENV IPFS_PATH=/data/ipfs
 
-# Startup script to deploy contract and then run supervisor
-COPY <<EOF /app/start.sh
-#!/bin/sh
-set -e
-
-# Wait for IPFS and Hardhat to be available (optional but good practice)
-sleep 5
-
-# Deploy the smart contract...
-echo "Deploying smart contract..."
-cd /app/blockchain
-npx hardhat run scripts/deploy.ts --network localhost
-
-# Start supervisord to manage all processes
-echo "Starting supervisor..."
-/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
-EOF
-
-RUN chmod +x /app/start.sh
-
 # Expose the backend port
 EXPOSE 3001
 
-# Run the startup script
-CMD ["/app/start.sh"]
+# Run supervisord
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
