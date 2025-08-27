@@ -7,7 +7,7 @@ O Projeto TKB é uma prova de conceito de uma plataforma que utiliza a tecnologi
 
 Ao criar um registro permanente, distribuído e inviolável, a plataforma garante os direitos de propriedade intelectual e a repartição justa e equitativa dos benefícios gerados por esse conhecimento para as comunidades detentoras. Essa iniciativa aproveita a imutabilidade e a transparência do blockchain para estabelecer uma prova de procedência segura e à prova de adulteração.
 
-## 🏗️ Arquitetura e Tecnologias (podem mudar!)
+## 🏗️ Arquitetura e Tecnologias
 
 ### Stack Tecnológico
 
