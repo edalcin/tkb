@@ -16,7 +16,9 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(docker compose:*)",
       "Bash(docker cp:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(git pull:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []
