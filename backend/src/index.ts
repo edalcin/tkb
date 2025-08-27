@@ -1,9 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import { fileURLToPath } from 'url'; // Import fileURLToPath
 import { ethers, Contract } from 'ethers';
-import fs from 'fs/promises';
+import * as fs from 'fs/promises';
 import { exec } from 'child_process';
+import { create } from 'ipfs-http-client';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = 3001;
@@ -18,10 +23,11 @@ interface KnowledgeRecord {
 }
 
 // --- Blockchain Connection Setup ---
-const CONTRACT_INFO_PATH = path.join(__dirname, '../data/contract-info.json');
-const HARDHAT_RPC_URL = 'http://localhost:8545';
+const CONTRACT_INFO_PATH = path.join(__dirname, '../../data/contract-info.json');
+const HARDHAT_RPC_URL = 'http://127.0.0.1:8545';
 
 let contract: Contract;
+let ipfs: any; // IPFS client instance
 
 async function deployContract(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -66,6 +72,18 @@ async function connectToContract() {
   }
 }
 
+async function connectToIPFS() {
+  try {
+    ipfs = create({ url: 'http://localhost:5001' });
+    const version = await ipfs.version();
+    console.log('Connected to IPFS node, version:', version.version);
+  } catch (error) {
+    console.error('Failed to connect to IPFS node:', error);
+    // Retry connecting to IPFS
+    setTimeout(connectToIPFS, 5000);
+  }
+}
+
 app.use(cors());
 app.use(express.json());
 
@@ -97,17 +115,19 @@ app.get('/api/knowledge', async (req, res) => {
 
 // --- Static File Serving ---
 // Serve static files from the React frontend app
-app.use(express.static(path.join(__dirname, '../frontend-build')));
+app.use(express.static(path.join(__dirname, '../../frontend-build')));
 
 // Anything that doesn't match the above, send back index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend-build', 'index.html'));
+  res.sendFile(path.join(__dirname, '../../frontend-build', 'index.html'));
 });
 
 // --- Server Initialization ---
 app.listen(port, () => {
   console.log(`Backend server listening at http://localhost:${port}`);
   // Wait a moment for other services to be ready before connecting
-  setTimeout(connectToContract, 5000);
+  setTimeout(connectToContract, 10000);
+  setTimeout(connectToIPFS, 5000);
 });
+
 

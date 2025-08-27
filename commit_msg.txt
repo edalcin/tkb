@@ -1,4 +1,0 @@
-fix: Attempt to install glibc for IPFS compatibility
-
-- Added glibc installation steps to Dockerfile.
-- Debugging persistent 'ENOENT' error for IPFS binary.

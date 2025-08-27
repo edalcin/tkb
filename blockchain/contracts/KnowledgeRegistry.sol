@@ -50,3 +50,4 @@ contract KnowledgeRegistry {
         }
         return allRecords;
     }
+}

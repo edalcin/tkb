@@ -17,22 +17,17 @@ RUN npm run build
 # Stage 3: Final Image
 FROM node:18-alpine
 
-# Install dependencies: Supervisor for process management, wget to download IPFS
-RUN apk add --no-cache supervisor python3 build-base libc-utils
+# Install dependencies: Supervisor for process management and IPFS
+RUN apk add --no-cache supervisor python3 build-base wget tar gzip
 
-# Install glibc for IPFS compatibility
-RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
-    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.39-r0/glibc-2.39-r0.apk -O /tmp/glibc.apk && \
-    apk add --no-cache /tmp/glibc.apk && \
-    rm /tmp/glibc.apk
-
-# Install IPFS (Kubo)
-ENV KUBO_VERSION=v0.23.0
-RUN wget https://dist.ipfs.tech/kubo/${KUBO_VERSION}/kubo_${KUBO_VERSION}_linux-amd64.tar.gz -O /tmp/kubo.tar.gz && \
-    tar -xvzf /tmp/kubo.tar.gz -C /tmp && \
-    mv /tmp/kubo/ipfs /usr/local/bin/ipfs && \
-    chmod +x /usr/local/bin/ipfs && \
-    rm -rf /tmp/kubo.tar.gz /tmp/kubo
+# Install IPFS (Kubo) - detect architecture
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then ARCH="amd64"; elif [ "$ARCH" = "aarch64" ]; then ARCH="arm64"; fi && \
+    wget https://dist.ipfs.tech/kubo/v0.21.0/kubo_v0.21.0_linux-${ARCH}.tar.gz \
+    && tar -xzf kubo_v0.21.0_linux-${ARCH}.tar.gz \
+    && mv kubo/ipfs /usr/local/bin/ \
+    && chmod +x /usr/local/bin/ipfs \
+    && rm -rf kubo kubo_v0.21.0_linux-${ARCH}.tar.gz
 
 # Set up application directory
 WORKDIR /app
@@ -50,9 +45,11 @@ RUN npm install --prefix ./blockchain
 # Copy supervisor configuration
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Create directory for IPFS data and Supervisor logs
-RUN mkdir -p /data/ipfs /var/log/supervisor
+# Create directory for IPFS data, application data and Supervisor logs
+RUN mkdir -p /data/ipfs /app/data /var/log/supervisor
 ENV IPFS_PATH=/data/ipfs
+
+# IPFS will be initialized at runtime
 
 # Expose the backend port
 EXPOSE 3001
