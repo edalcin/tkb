@@ -1,17 +1,13 @@
-# 🌱 Projeto TKB (Traditional Knowledge Blockchain)
-
-[![Build and Deploy](https://github.com/edalcin/tkb/actions/workflows/build-and-deploy.yml/badge.svg)](https://github.com/edalcin/tkb/actions/workflows/build-and-deploy.yml)
-[![Release](https://github.com/edalcin/tkb/actions/workflows/release.yml/badge.svg)](https://github.com/edalcin/tkb/actions/workflows/release.yml)
-[![Docker Image](https://ghcr-badge.deta.dev/edalcin/tkb/latest_tag?trim=major&label=latest)](https://github.com/edalcin/tkb/pkgs/container/tkb)
-[![Docker Image Size](https://ghcr-badge.deta.dev/edalcin/tkb/size)](https://github.com/edalcin/tkb/pkgs/container/tkb)
+# Projeto TKB (Traditional Knowledge Blockchain)
+>Eduardo Dalcin
 
 ## 📋 Visão Geral
 
-O Projeto TKB é uma plataforma baseada em blockchain dedicada ao registro, autenticação e proteção do conhecimento tradicional associado à biodiversidade. A aplicação visa garantir os direitos de propriedade intelectual e a repartição justa e equitativa dos benefícios para as comunidades tradicionais, detentoras desse conhecimento.
+O Projeto TKB é uma prova de conceito de uma plataforma que utiliza a tecnologia [blockchain](https://www.ibm.com/br-pt/think/topics/blockchain) para o registro, autenticação e proteção do conhecimento tradicional associado à biodiversidade.
 
-Esta iniciativa utiliza a imutabilidade e a transparência da tecnologia blockchain para criar um registro de procedência seguro, confiável e à prova de adulteração.
+Ao criar um registro permanente, distribuído e inviolável, a plataforma garante os direitos de propriedade intelectual e a repartição justa e equitativa dos benefícios gerados por esse conhecimento para as comunidades detentoras. Essa iniciativa aproveita a imutabilidade e a transparência do blockchain para estabelecer uma prova de procedência segura e à prova de adulteração.
 
-## 🏗️ Arquitetura e Tecnologias
+## 🏗️ Arquitetura e Tecnologias (podem mudar!)
 
 ### Stack Tecnológico
 
