@@ -1,0 +1,6 @@
+refactor: Convert project to single-container architecture
+
+- Replaced docker-compose with a single root Dockerfile.
+- Introduced Supervisor for internal process management (backend, hardhat, ipfs).
+- Updated backend to serve the static frontend build.
+- Updated documentation (README, UNRAID_INSTRUCTIONS) to reflect the new architecture.

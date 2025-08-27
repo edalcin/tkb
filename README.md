@@ -8,32 +8,40 @@ Esta iniciativa utiliza a imutabilidade e a transparência da tecnologia blockch
 
 ## 2. Arquitetura e Tecnologias
 
-Este projeto é um MVP (Produto Mínimo Viável) e foi construído utilizando uma arquitetura de microsserviços containerizada com Docker.
+Para simplificar a implantação e o gerenciamento, este projeto foi encapsulado em uma **imagem de contêiner único**. Um processo interno, `Supervisor`, é responsável por gerenciar todos os serviços necessários para a aplicação funcionar.
 
-- **Containerização:** `Docker` e `Docker Compose`
-  - **Descrição:** Toda a aplicação é encapsulada em contêineres, garantindo um ambiente de desenvolvimento e produção consistente e de fácil configuração.
+- **Containerização:** `Docker (Single Container)`
+  - **Descrição:** Toda a aplicação (Frontend, Backend, Blockchain, IPFS) roda dentro de um único contêiner Docker, gerenciado pelo `Supervisor`.
 
 - **Frontend (Interface Web):** `React` com `TypeScript`
-  - **Descrição:** Uma interface de usuário moderna e reativa que permite às comunidades registrar seus conhecimentos e a usuários autorizados consultá-los. A interação com a blockchain no lado do cliente é feita através da biblioteca `ethers.js`.
+  - **Descrição:** Uma interface de usuário moderna e reativa. O código é compilado e os arquivos estáticos resultantes são servidos diretamente pelo backend.
 
 - **Backend (API):** `Node.js` com `Express`
-  - **Descrição:** Um servidor responsável por fazer a ponte entre o frontend e a infraestrutura descentralizada. Ele gerencia as requisições, interage com o IPFS e envia as transações para o contrato inteligente.
+  - **Descrição:** O servidor principal que expõe a API para o frontend, interage com o contrato inteligente na blockchain e gerencia o armazenamento no IPFS.
 
 - **Blockchain:** `Ethereum (Hardhat)` e `Solidity`
-  - **Descrição:** O núcleo da aplicação. Um contrato inteligente escrito em Solidity e implantado em uma rede de desenvolvimento local (Hardhat) gerencia as regras de negócio, como o registro, o controle de acesso e a lógica de repartição de benefícios.
+  - **Descrição:** O núcleo da aplicação. Um contrato inteligente escrito em Solidity e implantado em uma rede de desenvolvimento Hardhat que roda internamente no contêiner.
 
-- **Armazenamento de Dados:** `IPFS (InterPlanetary File System)`
-  - **Descrição:** Para evitar os altos custos de armazenamento na blockchain, os arquivos (documentos, imagens, áudios) são armazenados no IPFS. Apenas o hash (identificador único) do conteúdo é gravado na blockchain, garantindo a integridade e a imutabilidade da referência ao dado original.
+- **Armazenamento de Dados:** `IPFS (Kubo)`
+  - **Descrição:** O daemon do IPFS roda como um serviço interno para armazenar arquivos (documentos, imagens, etc.) de forma descentralizada. Apenas o hash do arquivo é gravado na blockchain.
+
+- **Gerenciador de Processos:** `Supervisor`
+  - **Descrição:** Uma ferramenta que garante que todos os processos (IPFS, Hardhat, Backend) sejam iniciados e mantidos em execução dentro do contêiner.
 
 ## 3. Como Executar o Projeto
 
 1.  **Pré-requisitos:**
-    -   Docker e Docker Compose instalados.
+    -   Docker instalado.
 
-2.  **Iniciando a Aplicação:**
-    -   Clone o repositório.
-    -   Na raiz do projeto, execute o comando:
+2.  **Construindo a Imagem:**
+    -   Na raiz do projeto, execute o comando para construir a imagem Docker:
         ```bash
-        docker-compose up --build
+        docker build -t tkb-app .
         ```
-    -   Acesse o frontend em `http://localhost:3000`.
+
+3.  **Iniciando o Contêiner:**
+    -   Execute o contêiner mapeando a porta da aplicação (ex: 8080) e um volume para os dados persistentes do IPFS:
+        ```bash
+        docker run -d -p 8080:3001 --name tkb-container -v tkb-ipfs-data:/data/ipfs tkb-app
+        ```
+    -   Acesse o frontend em `http://localhost:8080`.

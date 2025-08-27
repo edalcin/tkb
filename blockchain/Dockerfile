@@ -13,5 +13,8 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-# Run the hardhat node when the container launches
-CMD ["npx", "hardhat", "node", "--hostname", "0.0.0.0"]
+# Give execution permission to the entrypoint script
+RUN chmod +x /app/entrypoint.sh
+
+# Run the entrypoint script when the container launches
+CMD ["/app/entrypoint.sh"]

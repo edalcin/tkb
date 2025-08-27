@@ -37,6 +37,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - '8545:8545' # Porta RPC do Ethereum
+    volumes:
+      - shared-data:/shared
 
   # Decentralized Storage Service (IPFS)
   ipfs:
@@ -49,3 +51,4 @@ services:
 
 volumes:
   ipfs_data:
+  shared-data:
