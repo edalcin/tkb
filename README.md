@@ -1,5 +1,10 @@
 # 🌱 Projeto TKB (Traditional Knowledge Blockchain)
 
+[![Build and Deploy](https://github.com/edalcin/tkb/actions/workflows/build-and-deploy.yml/badge.svg)](https://github.com/edalcin/tkb/actions/workflows/build-and-deploy.yml)
+[![Release](https://github.com/edalcin/tkb/actions/workflows/release.yml/badge.svg)](https://github.com/edalcin/tkb/actions/workflows/release.yml)
+[![Docker Image](https://ghcr-badge.deta.dev/edalcin/tkb/latest_tag?trim=major&label=latest)](https://github.com/edalcin/tkb/pkgs/container/tkb)
+[![Docker Image Size](https://ghcr-badge.deta.dev/edalcin/tkb/size)](https://github.com/edalcin/tkb/pkgs/container/tkb)
+
 ## 📋 Visão Geral
 
 O Projeto TKB é uma plataforma baseada em blockchain dedicada ao registro, autenticação e proteção do conhecimento tradicional associado à biodiversidade. A aplicação visa garantir os direitos de propriedade intelectual e a repartição justa e equitativa dos benefícios para as comunidades tradicionais, detentoras desse conhecimento.
@@ -53,33 +58,53 @@ Para simplificar a implantação e o gerenciamento, este projeto foi arquitetado
 - **Docker** instalado e funcionando
 - **Git** para clonar o repositório
 
-### Passos para Execução
+### 🐳 Opção 1: Usando Imagem Pré-construída (Recomendado)
 
-1. **Clone o repositório:**
-   ```bash
-   git clone <repository-url>
-   cd tkb
-   ```
+```bash
+# 1. Baixar e executar a imagem oficial
+docker run -d -p 8080:3001 --name tkb-container ghcr.io/edalcin/tkb:latest
 
-2. **Construa a imagem Docker:**
-   ```bash
-   docker build -t tkb-app .
-   ```
+# 2. Deploy do smart contract e dados de teste
+docker exec tkb-container sh -c "cd /app/blockchain && npx hardhat run simple-deploy.js --network localhost"
 
-3. **Execute o contêiner:**
-   ```bash
-   docker run -d -p 8080:3001 --name tkb-container tkb-app
-   ```
+# 3. Acessar a aplicação
+# Frontend: http://localhost:8080
+# API: http://localhost:8080/api/knowledge
+```
 
-4. **Deploy do smart contract e dados de teste:**
-   ```bash
-   docker exec tkb-container sh -c "cd /app/blockchain && npx hardhat run simple-deploy.js --network localhost"
-   ```
+### 🔧 Opção 2: Build Local (Desenvolvimento)
 
-5. **Acesse a aplicação:**
-   - **Frontend:** http://localhost:8080
-   - **API Backend:** http://localhost:8080/api/knowledge
-   - **Status:** http://localhost:8080/api/hello
+```bash
+# 1. Clonar o repositório
+git clone https://github.com/edalcin/tkb.git
+cd tkb
+
+# 2. Construir a imagem Docker
+docker build -t tkb-app .
+
+# 3. Executar o contêiner
+docker run -d -p 8080:3001 --name tkb-container tkb-app
+
+# 4. Deploy do smart contract e dados de teste
+docker exec tkb-container sh -c "cd /app/blockchain && npx hardhat run simple-deploy.js --network localhost"
+
+# 5. Acessar a aplicação
+# Frontend: http://localhost:8080
+# API: http://localhost:8080/api/knowledge
+# Status: http://localhost:8080/api/hello
+```
+
+### 📦 Imagens Disponíveis
+
+As imagens Docker são automaticamente construídas e publicadas no GitHub Container Registry:
+
+- **Última versão:** `ghcr.io/edalcin/tkb:latest`
+- **Versão estável:** `ghcr.io/edalcin/tkb:stable`
+- **Versões específicas:** `ghcr.io/edalcin/tkb:v1.0.0`
+
+**Arquiteturas suportadas:**
+- `linux/amd64` (x86_64)
+- `linux/arm64` (ARM64/ARMv8)
 
 ### 🧹 Limpeza (Opcional)
 ```bash
@@ -138,6 +163,30 @@ tkb/
     ├── hardhat.config.ts           # Configuração Hardhat
     └── package.json                # Dependências blockchain
 ```
+
+## 🚀 CI/CD e Publicação Automática
+
+Este projeto utiliza **GitHub Actions** para automatizar o build e publicação de imagens Docker:
+
+### 📋 Workflows Configurados
+
+- **🔨 Build and Deploy** (`.github/workflows/build-and-deploy.yml`)
+  - Executado a cada push na branch `main`
+  - Build automático para `linux/amd64` e `linux/arm64`
+  - Publicação no GitHub Container Registry
+  - Cache otimizado para builds rápidos
+
+- **🏷️ Release** (`.github/workflows/release.yml`)
+  - Executado ao criar uma nova release
+  - Gera tags versionadas (v1.0.0, v1.0, v1)
+  - Atualiza descrição do pacote automaticamente
+
+### 📦 Publicação de Imagens
+
+As imagens são automaticamente publicadas em:
+- **Registry:** `ghcr.io/edalcin/tkb`
+- **Tags automáticas:** `latest`, `main`, `v*`
+- **Multi-arquitetura:** AMD64 e ARM64
 
 ## 🔧 Desenvolvimento
 

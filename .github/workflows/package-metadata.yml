@@ -1,0 +1,40 @@
+name: Update Package Metadata
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  update-metadata:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Update package metadata
+      run: |
+        # Configure package visibility and metadata
+        curl -X PATCH \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/orgs/edalcin/packages/container/tkb \
+          -d '{
+            "visibility": "public",
+            "description": "🌱 TKB - Traditional Knowledge Blockchain Platform. A complete containerized solution for registering and protecting traditional knowledge using blockchain technology with React frontend, Node.js backend, Ethereum smart contracts, and IPFS storage."
+          }' || echo "Package metadata update attempted"
