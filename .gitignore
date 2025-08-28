@@ -1,2 +1,3 @@
 # Ignore the nested git repository directory
 tkb/
+node_modules/
