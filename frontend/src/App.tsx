@@ -30,16 +30,16 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  // Detect if accessed via external IP and use appropriate API URL
-  const getApiUrl = (endpoint: string) => {
+  // Try proxy first, then direct API if that fails
+  const getApiUrl = (endpoint: string, useDirect = false) => {
     const isExternal = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
     
-    if (isExternal) {
-      // For external access, use direct backend URL
+    if (useDirect && isExternal) {
+      // For external access, try direct backend URL
       const externalApiUrl = process.env.REACT_APP_EXTERNAL_API_URL || `http://${window.location.hostname}:8112`;
       return `${externalApiUrl}${endpoint}`;
     } else {
-      // For local access, use proxy
+      // For all access, try proxy first
       return endpoint;
     }
   };
@@ -51,8 +51,16 @@ function App() {
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      const apiUrl = getApiUrl('/api/knowledge');
-      const response = await fetch(apiUrl);
+      let apiUrl = getApiUrl('/api/knowledge');
+      let response = await fetch(apiUrl);
+      
+      // If proxy fails and we're on external IP, try direct API
+      if (!response.ok && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        console.log('Proxy failed, trying direct API...');
+        apiUrl = getApiUrl('/api/knowledge', true);
+        response = await fetch(apiUrl);
+      }
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

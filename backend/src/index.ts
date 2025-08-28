@@ -103,12 +103,28 @@ async function connectToIPFS() {
   }
 }
 
-app.use(cors());
+// Configure CORS to allow external access
+app.use(cors({
+  origin: true, // Allow all origins
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 app.use(express.json());
 
 // --- API Routes ---
 app.get('/api/hello', (req, res) => {
   res.send({ message: 'TKB Backend is running!' });
+});
+
+// Test CORS endpoint
+app.get('/api/cors-test', (req, res) => {
+  res.json({ 
+    message: 'CORS test successful',
+    origin: req.headers.origin,
+    host: req.headers.host,
+    userAgent: req.headers['user-agent']?.slice(0, 50) + '...'
+  });
 });
 
 app.get('/api/knowledge', async (req, res) => {
