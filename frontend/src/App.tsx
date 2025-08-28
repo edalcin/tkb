@@ -30,42 +30,26 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  // Smart API URL logic - handle HTTPS and proxy correctly
+  // API URL logic based on environment variables
   const getApiUrls = (endpoint: string) => {
-    const isExternal = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-    const isHTTPS = window.location.protocol === 'https:';
+    const apiUrlFromEnv = process.env.REACT_APP_API_URL;
     
-    if (isExternal) {
-      if (window.location.hostname === 'tkb.dalc.in') {
-        if (isHTTPS) {
-          // For HTTPS tkb.dalc.in, we need HTTPS API or proxy
-          return [
-            endpoint, // Try proxy first (may work if React dev server running)
-            `https://api-tkb.dalc.in${endpoint}`, // HTTPS API endpoint via tunnel
-            // Skip HTTP URLs to avoid mixed content errors
-          ];
-        } else {
-          // HTTP version
-          return [
-            endpoint,
-            `http://tkb.dalc.in:8113${endpoint}`,
-          ];
-        }
-      } else {
-        // For direct IP access
-        return [
-          endpoint,
-          `http://${window.location.hostname}:8113${endpoint}`,
-          `http://localhost:8113${endpoint}`
-        ];
-      }
-    } else {
-      // For local access
+    if (apiUrlFromEnv) {
+      // Use the environment variable if it's defined
+      return [`${apiUrlFromEnv}${endpoint}`];
+    }
+    
+    // Fallback for local development and proxy
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocal) {
       return [
-        endpoint, // proxy first
-        `http://localhost:8113${endpoint}`
+        endpoint, // Assumes a proxy is set up on the dev server
+        'http://localhost:3001/api' + endpoint.replace('/api', '')
       ];
     }
+
+    // Fallback for production if no env var is set
+    return [endpoint]; // Use relative path, relying on server proxy
   };
 
   useEffect(() => {
