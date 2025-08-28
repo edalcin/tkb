@@ -16,5 +16,8 @@ COPY . .
 # Make port 3000 available to the world outside this container
 EXPOSE 3000
 
+# Set environment variable to accept connections from any host
+ENV HOST=0.0.0.0
+
 # Run the app when the container launches
 CMD ["npm", "start"]

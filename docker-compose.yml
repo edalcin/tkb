@@ -6,11 +6,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - '3000:3000'
+      - '8111:3000'
     volumes:
       - ./frontend:/app
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true # Habilita hot-reloading em ambientes Docker
+      - HOST=0.0.0.0 # Aceita conexões de qualquer IP
     depends_on:
       - backend
 
