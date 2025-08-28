@@ -110,6 +110,7 @@ const allowedOrigins = [
   'http://192.168.1.10:8111',
   'http://192.168.1.10:8113',
   'http://tkb.dalc.in:8111',
+  'http://tkb.dalc.in:8113',
 ];
 app.use(cors({
   origin: (origin, callback) => {
@@ -148,8 +149,12 @@ app.get('/api/knowledge', async (req, res) => {
     return res.status(503).json({ error: 'Smart contract not available. Still connecting...' });
   }
   try {
+    console.log('Fetching total records from contract...');
     const totalRecords = await contract.getTotalRecords();
+    console.log(`Total records found: ${totalRecords}`);
     const records: TraditionalKnowledgeRecord[] = [];
+    let accessibleCount = 0;
+    let restrictedCount = 0;
     
     // Fetch all records individually
     for (let i = 0; i < Number(totalRecords); i++) {
@@ -180,16 +185,27 @@ app.get('/api/knowledge', async (req, res) => {
           validatorId: record.validatorId,
         };
         records.push(formattedRecord);
-      } catch (recordError) {
-        console.error(`Error fetching record ${i}:`, recordError);
+        accessibleCount++;
+      } catch (recordError: any) {
+        restrictedCount++;
+        if (recordError.reason === 'Access restricted to community') {
+          console.log(`Record ${i}: Access restricted to community - skipping`);
+        } else {
+          console.error(`Error fetching record ${i}:`, recordError.reason || recordError.message);
+        }
         // Skip records that can't be accessed due to permissions
       }
     }
     
+    console.log(`Successfully fetched ${accessibleCount} accessible records, ${restrictedCount} restricted`);
     res.json(records);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching records from blockchain:', error);
-    res.status(500).json({ error: 'Failed to fetch records.' });
+    // If this is a contract connection issue, return 503
+    if (error.code === 'NETWORK_ERROR' || error.message?.includes('connection')) {
+      return res.status(503).json({ error: 'Blockchain connection unavailable. Please try again later.' });
+    }
+    res.status(500).json({ error: 'Failed to fetch records: ' + (error.reason || error.message) });
   }
 });
 
