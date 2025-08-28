@@ -108,6 +108,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:8111',
   'http://192.168.1.10:8111',
+  'http://tkb.dalc.in:8111',
 ];
 app.use(cors({
   origin: (origin, callback) => {

@@ -1,3 +1,5 @@
+<p align="center"><img src="https://raw.githubusercontent.com/edalcin/tkb/main/images/tkbt.png" width="250"></p>
+
 # Projeto TKB (Traditional Knowledge Blockchain)
 >Eduardo Dalcin
 
@@ -130,6 +132,12 @@ docker rmi tkb-app
 - ✅ **Cards Responsivos** - Interface moderna e amigável
 - ✅ **Testes de Conectividade** - Botões para testar backend e recarregar dados
 - ✅ **Informações Detalhadas** - Exibe comunidade, responsável, data e hash IPFS
+
+## 📖 Estrutura do Contrato
+
+A estrutura de dados detalhada, as funções e os eventos do nosso contrato inteligente estão documentados em `contract.md`.
+
+[**Clique aqui para ver os detalhes do contrato.**](contract.md)
 
 ## 🗂️ Estrutura do Projeto
 
