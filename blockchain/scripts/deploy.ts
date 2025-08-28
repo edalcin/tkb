@@ -6,174 +6,56 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const KnowledgeRegistry = await ethers.getContractFactory("KnowledgeRegistry");
-  const registry = await KnowledgeRegistry.deploy();
+  // Deploy TraditionalKnowledgeRegistry
+  const TraditionalKnowledgeRegistry = await ethers.getContractFactory("TraditionalKnowledgeRegistry");
+  const registry = await TraditionalKnowledgeRegistry.deploy();
   
   // Wait for deployment
   await registry.waitForDeployment();
-  const contractAddress = await registry.getAddress();
+  const registryAddress = await registry.getAddress();
 
-  console.log(`KnowledgeRegistry deployed to: ${contractAddress}`);
+  console.log(`TraditionalKnowledgeRegistry deployed to: ${registryAddress}`);
+
+  // Deploy ExampleTraditionalKnowledge
+  const ExampleContract = await ethers.getContractFactory("ExampleTraditionalKnowledge");
+  const example = await ExampleContract.deploy(registryAddress);
+  
+  await example.waitForDeployment();
+  const exampleAddress = await example.getAddress();
+
+  console.log(`ExampleTraditionalKnowledge deployed to: ${exampleAddress}`);
 
   // --- Populating with sample data (Seeding) ---
   console.log("Seeding blockchain with sample data...");
 
-  // Create a contract instance at the deployed address
-  const deployedRegistry = await ethers.getContractAt("KnowledgeRegistry", contractAddress);
-  
-  const tx1 = await deployedRegistry.registerKnowledge("QmXoW8...", "Comunidade Kayapó");
+  // Populate with example data
+  const tx1 = await example.populateExamples();
   await tx1.wait();
-  console.log("Registered: Conhecimento sobre a planta A");
+  console.log("Example traditional knowledge records populated");
 
-  const tx2 = await deployedRegistry.registerKnowledge("QmYp7Z...", "Comunidade Guarani");
+  // Verify some records
+  const tx2 = await example.verifyExampleRecords();
   await tx2.wait();
-  console.log("Registered: Técnica de plantio B");
-
-  const tx3 = await deployedRegistry.registerKnowledge("QmZt9X...", "Comunidade Yanomami");
-  await tx3.wait();
-  console.log("Registered: Uso medicinal da casca C");
+  console.log("Example records verified");
 
   console.log("Seeding complete.");
   // --- End of Seeding ---
 
   // --- Saving contract info ---
   const contractInfo = {
-    address: contractAddress,
-    abi: [
-      {
-        "inputs": [],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
+    registryAddress: registryAddress,
+    exampleAddress: exampleAddress,
+    contracts: {
+      TraditionalKnowledgeRegistry: {
+        address: registryAddress,
+        name: "TraditionalKnowledgeRegistry"
       },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "uint256",
-            "name": "id",
-            "type": "uint256"
-          },
-          {
-            "indexed": false,
-            "internalType": "string",
-            "name": "ipfsHash",
-            "type": "string"
-          },
-          {
-            "indexed": false,
-            "internalType": "string",
-            "name": "communityId",
-            "type": "string"
-          },
-          {
-            "indexed": false,
-            "internalType": "address",
-            "name": "communityLead",
-            "type": "address"
-          }
-        ],
-        "name": "KnowledgeRegistered",
-        "type": "event"
-      },
-      {
-        "inputs": [],
-        "name": "getAllRecords",
-        "outputs": [
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-              },
-              {
-                "internalType": "string",
-                "name": "ipfsHash",
-                "type": "string"
-              },
-              {
-                "internalType": "address",
-                "name": "communityLead",
-                "type": "address"
-              },
-              {
-                "internalType": "string",
-                "name": "communityId",
-                "type": "string"
-              },
-              {
-                "internalType": "uint256",
-                "name": "timestamp",
-                "type": "uint256"
-              }
-            ],
-            "internalType": "struct KnowledgeRegistry.KnowledgeRecord[]",
-            "name": "",
-            "type": "tuple[]"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "string",
-            "name": "_ipfsHash",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "_communityId",
-            "type": "string"
-          }
-        ],
-        "name": "registerKnowledge",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "name": "records",
-        "outputs": [
-          {
-            "internalType": "uint256",
-            "name": "id",
-            "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "ipfsHash",
-            "type": "string"
-          },
-          {
-            "internalType": "address",
-            "name": "communityLead",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "communityId",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
+      ExampleTraditionalKnowledge: {
+        address: exampleAddress,
+        name: "ExampleTraditionalKnowledge"
       }
-    ],
+    },
+    deployedAt: new Date().toISOString()
   };
 
   const dataDir = "/app/data";
