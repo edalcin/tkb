@@ -104,8 +104,22 @@ async function connectToIPFS() {
 }
 
 // Configure CORS to allow external access
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:8111',
+  'http://192.168.1.10:8111',
+];
 app.use(cors({
-  origin: true, // Allow all origins
+  origin: (origin, callback) => {
+    // allow requests with no origin 
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      var msg = 'The CORS policy for this site does not ' +
+                'allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']

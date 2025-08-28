@@ -30,16 +30,16 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  // Try proxy first, then direct API if that fails
-  const getApiUrl = (endpoint: string, useDirect = false) => {
+  // Always use direct API for external access, proxy for localhost
+  const getApiUrl = (endpoint: string) => {
     const isExternal = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
     
-    if (useDirect && isExternal) {
-      // For external access, try direct backend URL
-      const externalApiUrl = process.env.REACT_APP_EXTERNAL_API_URL || `http://${window.location.hostname}:8112`;
+    if (isExternal) {
+      // For external access, use direct backend URL
+      const externalApiUrl = process.env.REACT_APP_EXTERNAL_API_URL || `http://${window.location.hostname}:8113`;
       return `${externalApiUrl}${endpoint}`;
     } else {
-      // For all access, try proxy first
+      // For local access, use proxy
       return endpoint;
     }
   };
@@ -51,15 +51,9 @@ function App() {
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      let apiUrl = getApiUrl('/api/knowledge');
-      let response = await fetch(apiUrl);
-      
-      // If proxy fails and we're on external IP, try direct API
-      if (!response.ok && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        console.log('Proxy failed, trying direct API...');
-        apiUrl = getApiUrl('/api/knowledge', true);
-        response = await fetch(apiUrl);
-      }
+      const apiUrl = getApiUrl('/api/knowledge');
+      console.log('Calling API:', apiUrl);
+      const response = await fetch(apiUrl);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -68,6 +62,7 @@ function App() {
       setRecords(data);
       setError('');
     } catch (err) {
+      console.error('API Error:', err);
       setError(`Erro ao carregar registros: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
     } finally {
       setLoading(false);
@@ -146,7 +141,7 @@ function App() {
           fontSize: '0.85rem'
         }}>
           📡 Conectando via: {window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? 
-            `IP Externo (${window.location.hostname}:8112)` : 'Localhost (proxy)'}
+            `IP Externo (${window.location.hostname}:8113)` : 'Localhost (proxy)'}
         </div>
 
         {error && (

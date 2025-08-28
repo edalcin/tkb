@@ -23,7 +23,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - '3001:3001'
-      - '8112:3001'
+      - '8113:3001'
     volumes:
       - ./backend:/app
       - /app/node_modules
