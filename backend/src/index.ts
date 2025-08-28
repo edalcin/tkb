@@ -108,6 +108,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:8111',
   'http://192.168.1.10:8111',
+  'http://192.168.1.10:8113',
   'http://tkb.dalc.in:8111',
 ];
 app.use(cors({
@@ -202,8 +203,8 @@ app.get('*', (req, res) => {
 });
 
 // --- Server Initialization ---
-app.listen(port, () => {
-  console.log(`Backend server listening at http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Backend server listening at http://0.0.0.0:${port}`);
   // Wait a moment for other services to be ready before connecting
   setTimeout(connectToContract, 10000);
   setTimeout(connectToIPFS, 5000);

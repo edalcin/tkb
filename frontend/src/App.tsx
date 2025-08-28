@@ -30,17 +30,23 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  // Always use direct API for external access, proxy for localhost
-  const getApiUrl = (endpoint: string) => {
+  // Fallback API logic - try external first, then localhost if failed
+  const getApiUrls = (endpoint: string) => {
     const isExternal = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
     
     if (isExternal) {
-      // For external access, use direct backend URL
-      const externalApiUrl = process.env.REACT_APP_EXTERNAL_API_URL || `http://${window.location.hostname}:8113`;
-      return `${externalApiUrl}${endpoint}`;
+      // For external access, try multiple options
+      return [
+        `http://${window.location.hostname}:8113${endpoint}`,
+        `http://localhost:8113${endpoint}`,
+        endpoint // proxy fallback
+      ];
     } else {
-      // For local access, use proxy
-      return endpoint;
+      // For local access, prefer proxy first
+      return [
+        endpoint, // proxy first
+        `http://localhost:8113${endpoint}`
+      ];
     }
   };
 
@@ -51,18 +57,34 @@ function App() {
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      const apiUrl = getApiUrl('/api/knowledge');
-      console.log('Calling API:', apiUrl);
-      const response = await fetch(apiUrl);
+      const apiUrls = getApiUrls('/api/knowledge');
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      let lastError: Error | null = null;
+      for (const apiUrl of apiUrls) {
+        try {
+          console.log('Trying API:', apiUrl);
+          const response = await fetch(apiUrl);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          setRecords(data);
+          setError('');
+          console.log('✅ Successfully connected via:', apiUrl);
+          return; // Success, exit early
+        } catch (err) {
+          console.error('❌ API Error with', apiUrl, ':', err);
+          lastError = err instanceof Error ? err : new Error('Unknown error');
+          continue; // Try next URL
+        }
       }
-      const data = await response.json();
-      setRecords(data);
-      setError('');
+      
+      // If we get here, all URLs failed
+      throw lastError || new Error('All API endpoints failed');
     } catch (err) {
-      console.error('API Error:', err);
+      console.error('All API attempts failed:', err);
       setError(`Erro ao carregar registros: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
     } finally {
       setLoading(false);
@@ -70,14 +92,22 @@ function App() {
   };
 
   const checkBackend = async () => {
-    try {
-      const apiUrl = getApiUrl('/api/hello');
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-      alert(data.message);
-    } catch (err) {
-      alert('Erro ao conectar com o backend!');
+    const apiUrls = getApiUrls('/api/hello');
+    
+    for (const apiUrl of apiUrls) {
+      try {
+        console.log('Testing backend via:', apiUrl);
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        alert(`✅ Backend conectado via: ${apiUrl}\n\nMessage: ${data.message}`);
+        return; // Success, exit early
+      } catch (err) {
+        console.error('Backend test failed for', apiUrl, ':', err);
+        continue; // Try next URL
+      }
     }
+    
+    alert('❌ Erro ao conectar com o backend em todas as URLs testadas!');
   };
 
   return (
@@ -140,8 +170,7 @@ function App() {
           marginBottom: '1rem',
           fontSize: '0.85rem'
         }}>
-          📡 Conectando via: {window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? 
-            `IP Externo (${window.location.hostname}:8113)` : 'Localhost (proxy)'}
+          📡 Hostname: {window.location.hostname} | Tentativas de API: {getApiUrls('/api/knowledge').map((url, i) => `${i+1}. ${url}`).join(' → ')}
         </div>
 
         {error && (
