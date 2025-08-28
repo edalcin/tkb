@@ -30,19 +30,19 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  // Fallback API logic - try external first, then localhost if failed
+  // Simple API URL logic - proxy first for external domains
   const getApiUrls = (endpoint: string) => {
     const isExternal = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
     
     if (isExternal) {
-      // For external access, try multiple options
+      // For external domains (including tkb.dalc.in), try proxy first
       return [
+        endpoint, // proxy first (this should work for tkb.dalc.in)
         `http://${window.location.hostname}:8113${endpoint}`,
-        `http://localhost:8113${endpoint}`,
-        endpoint // proxy fallback
+        `http://localhost:8113${endpoint}`
       ];
     } else {
-      // For local access, prefer proxy first
+      // For local access
       return [
         endpoint, // proxy first
         `http://localhost:8113${endpoint}`
