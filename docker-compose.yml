@@ -24,6 +24,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - shared-data:/app/data
     depends_on:
       - hardhat
       - ipfs
@@ -36,7 +37,7 @@ services:
     ports:
       - '8545:8545' # Porta RPC do Ethereum
     volumes:
-      - shared-data:/shared
+      - shared-data:/app/data
 
   # Decentralized Storage Service (IPFS)
   ipfs:

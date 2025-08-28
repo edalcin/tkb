@@ -4,7 +4,7 @@ import path from 'path';
 import { ethers, Contract } from 'ethers';
 import * as fs from 'fs/promises';
 import { exec } from 'child_process';
-import { create } from 'ipfs-http-client';
+// import { create } from 'ipfs-http-client'; // Temporarily disabled due to CommonJS compatibility issues
 
 const app = express();
 const port = 3001;
@@ -36,8 +36,8 @@ interface TraditionalKnowledgeRecord {
 }
 
 // --- Blockchain Connection Setup ---
-const CONTRACT_INFO_PATH = path.join(__dirname, '../../data/contract-info.json');
-const HARDHAT_RPC_URL = 'http://127.0.0.1:8545';
+const CONTRACT_INFO_PATH = '/app/data/contract-info.json';
+const HARDHAT_RPC_URL = 'http://hardhat:8545';
 
 let contract: Contract;
 let ipfs: any; // IPFS client instance
@@ -47,7 +47,7 @@ async function deployContract(): Promise<void> {
     console.log('Contract info not found. Attempting to deploy...');
     const deployProcess = exec(
       'npx hardhat run scripts/deploy.ts --network localhost',
-      { cwd: path.join(__dirname, '../../blockchain') }
+      { cwd: '/app' }
     );
 
     deployProcess.stdout?.on('data', (data) => console.log(`[Deploy Script]: ${data}`.trim()));
@@ -86,24 +86,16 @@ async function connectToContract() {
     console.log('Successfully connected to TraditionalKnowledgeRegistry at', registryAddress);
   } catch (error) {
     console.error('Contract connection error:', error);
-    // If reading fails (e.g., file not found), run deployment
-    try {
-      await deployContract();
-      // Retry connecting after deployment
-      setTimeout(connectToContract, 1000); // Short delay to allow file system to sync
-    } catch (deployError) {
-      console.error('Failed to deploy contract:', deployError);
-      // Retry connection attempt after a longer delay
-      setTimeout(connectToContract, 10000);
-    }
+    // Retry connection attempt after a delay - hardhat should deploy automatically
+    setTimeout(connectToContract, 5000);
   }
 }
 
 async function connectToIPFS() {
   try {
-    ipfs = create({ url: 'http://localhost:5001' });
-    const version = await ipfs.version();
-    console.log('Connected to IPFS node, version:', version.version);
+    // ipfs = create({ url: 'http://localhost:5001' });
+    // const version = await ipfs.version();
+    console.log('IPFS connection temporarily disabled - focusing on blockchain connectivity');
   } catch (error) {
     console.error('Failed to connect to IPFS node:', error);
     // Retry connecting to IPFS
@@ -128,7 +120,7 @@ app.get('/api/knowledge', async (req, res) => {
     const records: TraditionalKnowledgeRecord[] = [];
     
     // Fetch all records individually
-    for (let i = 0; i < totalRecords.toNumber(); i++) {
+    for (let i = 0; i < Number(totalRecords); i++) {
       try {
         const record = await contract.getRecord(i);
         const formattedRecord: TraditionalKnowledgeRecord = {
@@ -148,10 +140,10 @@ app.get('/api/knowledge', async (req, res) => {
           communityLocationHash: record.communityLocationHash,
           communityContactAddress: record.communityContactAddress,
           contributorAddress: record.contributorAddress,
-          dateRecorded: new Date(record.dateRecorded * 1000).toISOString(),
-          lastUpdated: new Date(record.lastUpdated * 1000).toISOString(),
-          verificationStatus: record.verificationStatus,
-          accessPermissions: record.accessPermissions,
+          dateRecorded: new Date(Number(record.dateRecorded) * 1000).toISOString(),
+          lastUpdated: new Date(Number(record.lastUpdated) * 1000).toISOString(),
+          verificationStatus: Number(record.verificationStatus),
+          accessPermissions: Number(record.accessPermissions),
           licensingInformationHash: record.licensingInformationHash,
           validatorId: record.validatorId,
         };
