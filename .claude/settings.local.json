@@ -21,7 +21,11 @@
       "WebSearch",
       "Bash(git rm:*)",
       "Bash(docker-compose:*)",
-      "Bash(nslookup:*)"
+      "Bash(nslookup:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx hardhat node:*)",
+      "Bash(npm start)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
