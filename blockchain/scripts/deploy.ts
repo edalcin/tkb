@@ -28,6 +28,12 @@ async function main() {
   // --- Populating with sample data (Seeding) ---
   console.log("Seeding blockchain with sample data...");
 
+  // Add deployer as validator
+  const registryInstance = await ethers.getContractAt("TraditionalKnowledgeRegistry", registryAddress);
+  const txValidator = await registryInstance.addValidator(deployer.address);
+  await txValidator.wait();
+  console.log("Deployer added as validator");
+
   // Populate with example data
   const tx1 = await example.populateExamples();
   await tx1.wait();

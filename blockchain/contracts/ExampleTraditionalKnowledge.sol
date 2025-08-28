@@ -21,7 +21,7 @@ contract ExampleTraditionalKnowledge {
         // Example 1: Turmeric (Curcuma longa) - Medicinal use
         registry.addTraditionalKnowledge(
             "Curcuma longa", // scientificName
-            "Açafrão-da-terra, Cúrcuma", // commonName
+            "Acafrao-da-terra, Curcuma", // commonName
             "Plant", // speciesType
             "Tropical regions, cultivated in gardens", // habitat
             "Medicinal", // useTo
@@ -31,7 +31,7 @@ contract ExampleTraditionalKnowledge {
             "QmExample1RecipeHash", // traditionalRecipeHash (IPFS)
             "QmExample1CulturalHash", // culturalSignificanceHash (IPFS)
             "COMM001", // communityId
-            "Quilombo do Cafundó", // communityName
+            "Quilombo do Cafundo", // communityName
             "QmExample1LocationHash", // communityLocationHash (IPFS)
             address(0x1234567890123456789012345678901234567890), // communityContactAddress
             TraditionalKnowledgeRegistry.AccessPermission.Public, // accessPermissions
@@ -42,7 +42,7 @@ contract ExampleTraditionalKnowledge {
         // Example 2: Copaiba (Copaifera spp.) - Medicinal use
         registry.addTraditionalKnowledge(
             "Copaifera spp.", // scientificName
-            "Copaíba, Pau-d'óleo", // commonName
+            "Copaiba, Pau-d-oleo", // commonName
             "Plant", // speciesType
             "Amazon Forest, Cerrado", // habitat
             "Medicinal", // useTo
@@ -52,7 +52,7 @@ contract ExampleTraditionalKnowledge {
             "QmExample2RecipeHash", // traditionalRecipeHash (IPFS)
             "QmExample2CulturalHash", // culturalSignificanceHash (IPFS)
             "COMM002", // communityId
-            "Comunidade Indígena Xingu", // communityName
+            "Comunidade Indigena Xingu", // communityName
             "QmExample2LocationHash", // communityLocationHash (IPFS)
             address(0x2345678901234567890123456789012345678901), // communityContactAddress
             TraditionalKnowledgeRegistry.AccessPermission.RestrictedToCommunity, // accessPermissions
@@ -60,10 +60,10 @@ contract ExampleTraditionalKnowledge {
             address(0x8765432109876543210987654321098765432109) // validatorId
         );
         
-        // Example 3: Jatobá (Hymenaea courbaril) - Multiple uses
+        // Example 3: Jatoba (Hymenaea courbaril) - Multiple uses
         registry.addTraditionalKnowledge(
             "Hymenaea courbaril", // scientificName
-            "Jatobá, Jutaí", // commonName
+            "Jatoba, Jutai", // commonName
             "Plant", // speciesType
             "Atlantic Forest, Cerrado, Amazon", // habitat
             "Food", // useTo
@@ -73,7 +73,7 @@ contract ExampleTraditionalKnowledge {
             "QmExample3RecipeHash", // traditionalRecipeHash (IPFS)
             "QmExample3CulturalHash", // culturalSignificanceHash (IPFS)
             "COMM003", // communityId
-            "Comunidade Ribeirinha do Tapajós", // communityName
+            "Comunidade Ribeirinha do Tapajos", // communityName
             "QmExample3LocationHash", // communityLocationHash (IPFS)
             address(0x3456789012345678901234567890123456789012), // communityContactAddress
             TraditionalKnowledgeRegistry.AccessPermission.Public, // accessPermissions
@@ -94,7 +94,7 @@ contract ExampleTraditionalKnowledge {
             "QmExample4RecipeHash", // traditionalRecipeHash (IPFS)
             "QmExample4CulturalHash", // culturalSignificanceHash (IPFS)
             "COMM004", // communityId
-            "Comunidade Cabocla do Solimões", // communityName
+            "Comunidade Cabocla do Solimoes", // communityName
             "QmExample4LocationHash", // communityLocationHash (IPFS)
             address(0x4567890123456789012345678901234567890123), // communityContactAddress
             TraditionalKnowledgeRegistry.AccessPermission.PermissionOnly, // accessPermissions
@@ -102,10 +102,10 @@ contract ExampleTraditionalKnowledge {
             address(0x6543210987654321098765432109876543210987) // validatorId
         );
         
-        // Example 5: Tucumã (Astrocaryum aculeatum) - Food and construction
+        // Example 5: Tucuma (Astrocaryum aculeatum) - Food and construction
         registry.addTraditionalKnowledge(
             "Astrocaryum aculeatum", // scientificName
-            "Tucumã", // commonName
+            "Tucuma", // commonName
             "Plant", // speciesType
             "Amazon rainforest", // habitat
             "Construction", // useTo
@@ -115,7 +115,7 @@ contract ExampleTraditionalKnowledge {
             "QmExample5RecipeHash", // traditionalRecipeHash (IPFS)
             "QmExample5CulturalHash", // culturalSignificanceHash (IPFS)
             "COMM005", // communityId
-            "Comunidade Indígena Tikuna", // communityName
+            "Comunidade Indigena Tikuna", // communityName
             "QmExample5LocationHash", // communityLocationHash (IPFS)
             address(0x5678901234567890123456789012345678901234), // communityContactAddress
             TraditionalKnowledgeRegistry.AccessPermission.RestrictedToCommunity, // accessPermissions

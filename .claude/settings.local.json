@@ -18,7 +18,9 @@
       "Bash(docker cp:*)",
       "Bash(git log:*)",
       "Bash(git pull:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git rm:*)",
+      "Bash(docker-compose:*)"
     ],
     "deny": [],
     "ask": []

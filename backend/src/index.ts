@@ -1,25 +1,38 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import { fileURLToPath } from 'url'; // Import fileURLToPath
 import { ethers, Contract } from 'ethers';
 import * as fs from 'fs/promises';
 import { exec } from 'child_process';
 import { create } from 'ipfs-http-client';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 const port = 3001;
 
 // --- Type Definitions ---
-interface KnowledgeRecord {
+interface TraditionalKnowledgeRecord {
   id: string;
-  ipfsHash: string;
-  communityLead: string;
+  scientificName: string;
+  commonName: string;
+  speciesType: string;
+  habitat: string;
+  useTo: string;
+  partsUsed: string;
+  preparationMethods: string;
+  useToRemarks: string;
+  traditionalRecipeHash: string;
+  culturalSignificanceHash: string;
   communityId: string;
-  timestamp: string;
+  communityName: string;
+  communityLocationHash: string;
+  communityContactAddress: string;
+  contributorAddress: string;
+  dateRecorded: string;
+  lastUpdated: string;
+  verificationStatus: number;
+  accessPermissions: number;
+  licensingInformationHash: string;
+  validatorId: string;
 }
 
 // --- Blockchain Connection Setup ---
@@ -55,10 +68,24 @@ async function connectToContract() {
   try {
     // First, try to read the file
     const contractInfo = JSON.parse(await fs.readFile(CONTRACT_INFO_PATH, 'utf8'));
-    const provider = new ethers.providers.JsonRpcProvider(HARDHAT_RPC_URL);
-    contract = new ethers.Contract(contractInfo.address, contractInfo.abi, provider);
-    console.log('Successfully connected to the smart contract at', contract.address);
+    const provider = new ethers.JsonRpcProvider(HARDHAT_RPC_URL);
+    
+    // Use the registry address from the new contract structure
+    const registryAddress = contractInfo.registryAddress || contractInfo.contracts?.TraditionalKnowledgeRegistry?.address;
+    if (!registryAddress) {
+      throw new Error('Registry address not found in contract info');
+    }
+    
+    // Create contract instance with minimal ABI for the methods we need
+    const abi = [
+      "function getTotalRecords() view returns (uint256)",
+      "function getRecord(uint256) view returns (tuple(uint256 id, string scientificName, string commonName, string speciesType, string habitat, string useTo, string partsUsed, string preparationMethods, string useToRemarks, string traditionalRecipeHash, string culturalSignificanceHash, string communityId, string communityName, string communityLocationHash, address communityContactAddress, address contributorAddress, uint256 dateRecorded, uint256 lastUpdated, uint8 verificationStatus, uint8 accessPermissions, string licensingInformationHash, address validatorId))"
+    ];
+    
+    contract = new ethers.Contract(registryAddress, abi, provider);
+    console.log('Successfully connected to TraditionalKnowledgeRegistry at', registryAddress);
   } catch (error) {
+    console.error('Contract connection error:', error);
     // If reading fails (e.g., file not found), run deployment
     try {
       await deployContract();
@@ -97,16 +124,45 @@ app.get('/api/knowledge', async (req, res) => {
     return res.status(503).json({ error: 'Smart contract not available. Still connecting...' });
   }
   try {
-    const allRecords = await contract.getAllRecords();
-    // Format the result to be more frontend-friendly (e.g., converting BigNumber)
-    const formattedRecords: KnowledgeRecord[] = allRecords.map((record: any) => ({
-      id: record.id.toString(),
-      ipfsHash: record.ipfsHash,
-      communityLead: record.communityLead,
-      communityId: record.communityId,
-      timestamp: new Date(record.timestamp * 1000).toISOString(),
-    }));
-    res.json(formattedRecords);
+    const totalRecords = await contract.getTotalRecords();
+    const records: TraditionalKnowledgeRecord[] = [];
+    
+    // Fetch all records individually
+    for (let i = 0; i < totalRecords.toNumber(); i++) {
+      try {
+        const record = await contract.getRecord(i);
+        const formattedRecord: TraditionalKnowledgeRecord = {
+          id: record.id.toString(),
+          scientificName: record.scientificName,
+          commonName: record.commonName,
+          speciesType: record.speciesType,
+          habitat: record.habitat,
+          useTo: record.useTo,
+          partsUsed: record.partsUsed,
+          preparationMethods: record.preparationMethods,
+          useToRemarks: record.useToRemarks,
+          traditionalRecipeHash: record.traditionalRecipeHash,
+          culturalSignificanceHash: record.culturalSignificanceHash,
+          communityId: record.communityId,
+          communityName: record.communityName,
+          communityLocationHash: record.communityLocationHash,
+          communityContactAddress: record.communityContactAddress,
+          contributorAddress: record.contributorAddress,
+          dateRecorded: new Date(record.dateRecorded * 1000).toISOString(),
+          lastUpdated: new Date(record.lastUpdated * 1000).toISOString(),
+          verificationStatus: record.verificationStatus,
+          accessPermissions: record.accessPermissions,
+          licensingInformationHash: record.licensingInformationHash,
+          validatorId: record.validatorId,
+        };
+        records.push(formattedRecord);
+      } catch (recordError) {
+        console.error(`Error fetching record ${i}:`, recordError);
+        // Skip records that can't be accessed due to permissions
+      }
+    }
+    
+    res.json(records);
   } catch (error) {
     console.error('Error fetching records from blockchain:', error);
     res.status(500).json({ error: 'Failed to fetch records.' });
