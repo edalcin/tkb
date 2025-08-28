@@ -20,7 +20,8 @@
       "Bash(git pull:*)",
       "WebSearch",
       "Bash(git rm:*)",
-      "Bash(docker-compose:*)"
+      "Bash(docker-compose:*)",
+      "Bash(nslookup:*)"
     ],
     "deny": [],
     "ask": []

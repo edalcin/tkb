@@ -37,7 +37,11 @@ interface TraditionalKnowledgeRecord {
 
 // --- Blockchain Connection Setup ---
 const CONTRACT_INFO_PATH = '/app/data/contract-info.json';
-const HARDHAT_RPC_URL = 'http://hardhat:8545';
+const HARDHAT_RPC_URLS = [
+  'http://hardhat:8545',      // Docker internal network
+  'http://localhost:8545',    // Localhost fallback
+  'http://127.0.0.1:8545'     // IP fallback
+];
 
 let contract: Contract;
 let ipfs: any; // IPFS client instance
@@ -68,12 +72,36 @@ async function connectToContract() {
   try {
     // First, try to read the file
     const contractInfo = JSON.parse(await fs.readFile(CONTRACT_INFO_PATH, 'utf8'));
-    const provider = new ethers.JsonRpcProvider(HARDHAT_RPC_URL);
     
     // Use the registry address from the new contract structure
     const registryAddress = contractInfo.registryAddress || contractInfo.contracts?.TraditionalKnowledgeRegistry?.address;
     if (!registryAddress) {
       throw new Error('Registry address not found in contract info');
+    }
+    
+    // Try connecting to Hardhat with multiple URLs
+    let provider = null;
+    let lastError = null;
+    
+    for (const rpcUrl of HARDHAT_RPC_URLS) {
+      try {
+        console.log(`Trying to connect to Hardhat at ${rpcUrl}...`);
+        const testProvider = new ethers.JsonRpcProvider(rpcUrl);
+        
+        // Test the connection
+        await testProvider.getNetwork();
+        provider = testProvider;
+        console.log(`✅ Successfully connected to Hardhat at ${rpcUrl}`);
+        break;
+      } catch (error: any) {
+        console.log(`❌ Failed to connect to ${rpcUrl}:`, error.message || error);
+        lastError = error;
+        continue;
+      }
+    }
+    
+    if (!provider) {
+      throw lastError || new Error('Failed to connect to any Hardhat RPC URL');
     }
     
     // Create contract instance with minimal ABI for the methods we need
@@ -84,8 +112,8 @@ async function connectToContract() {
     
     contract = new ethers.Contract(registryAddress, abi, provider);
     console.log('Successfully connected to TraditionalKnowledgeRegistry at', registryAddress);
-  } catch (error) {
-    console.error('Contract connection error:', error);
+  } catch (error: any) {
+    console.error('Contract connection error:', error.message || error);
     // Retry connection attempt after a delay - hardhat should deploy automatically
     setTimeout(connectToContract, 5000);
   }

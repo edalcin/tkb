@@ -30,17 +30,35 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  // Simple API URL logic - proxy first for external domains
+  // Smart API URL logic - handle HTTPS and proxy correctly
   const getApiUrls = (endpoint: string) => {
     const isExternal = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+    const isHTTPS = window.location.protocol === 'https:';
     
     if (isExternal) {
-      // For external domains (including tkb.dalc.in), try proxy first
-      return [
-        endpoint, // proxy first (this should work for tkb.dalc.in)
-        `http://${window.location.hostname}:8113${endpoint}`,
-        `http://localhost:8113${endpoint}`
-      ];
+      if (window.location.hostname === 'tkb.dalc.in') {
+        if (isHTTPS) {
+          // For HTTPS tkb.dalc.in, we need HTTPS API or proxy
+          return [
+            endpoint, // Try proxy first (may work if React dev server running)
+            `https://api-tkb.dalc.in${endpoint}`, // HTTPS API endpoint via tunnel
+            // Skip HTTP URLs to avoid mixed content errors
+          ];
+        } else {
+          // HTTP version
+          return [
+            endpoint,
+            `http://tkb.dalc.in:8113${endpoint}`,
+          ];
+        }
+      } else {
+        // For direct IP access
+        return [
+          endpoint,
+          `http://${window.location.hostname}:8113${endpoint}`,
+          `http://localhost:8113${endpoint}`
+        ];
+      }
     } else {
       // For local access
       return [

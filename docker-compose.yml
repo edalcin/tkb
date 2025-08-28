@@ -28,6 +28,8 @@ services:
       - ./backend:/app
       - /app/node_modules
       - shared-data:/app/data
+    environment:
+      - HARDHAT_URL=http://localhost:8545  # Fallback to localhost for external access
     depends_on:
       - hardhat
       - ipfs
