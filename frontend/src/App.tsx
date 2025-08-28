@@ -30,26 +30,14 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  // API URL logic based on environment variables
   const getApiUrls = (endpoint: string) => {
-    const apiUrlFromEnv = process.env.REACT_APP_API_URL;
-    
-    if (apiUrlFromEnv) {
-      // Use the environment variable if it's defined
-      return [`${apiUrlFromEnv}${endpoint}`];
-    }
-    
-    // Fallback for local development and proxy
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocal) {
-      return [
-        endpoint, // Assumes a proxy is set up on the dev server
-        'http://localhost:3001/api' + endpoint.replace('/api', '')
-      ];
-    }
+    // In production, the API is served from the same host.
+    // In development, we use the .env variable, falling back to localhost:3001.
+    const apiUrl = process.env.NODE_ENV === 'production'
+      ? '' // Use a relative path for production
+      : process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
-    // Fallback for production if no env var is set
-    return [endpoint]; // Use relative path, relying on server proxy
+    return [`${apiUrl}${endpoint}`];
   };
 
   useEffect(() => {
