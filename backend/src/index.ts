@@ -36,11 +36,11 @@ interface TraditionalKnowledgeRecord {
 }
 
 // --- Blockchain Connection Setup ---
-const CONTRACT_INFO_PATH = '/app/data/contract-info.json';
+const CONTRACT_INFO_PATH = path.join(__dirname, '../../data/contract-info.json');
 const HARDHAT_RPC_URLS = [
-  'http://hardhat:8545',      // Docker internal network
-  'http://localhost:8545',    // Localhost fallback
-  'http://127.0.0.1:8545'     // IP fallback
+  'http://localhost:8545',    // Localhost primary
+  'http://127.0.0.1:8545',    // IP fallback
+  'http://hardhat:8545'       // Docker internal network (fallback)
 ];
 
 let contract: Contract;

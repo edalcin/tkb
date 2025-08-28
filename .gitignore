@@ -1,3 +1,32 @@
 # Ignore the nested git repository directory
 tkb/
+
+# Dependencies
 node_modules/
+package-lock.json
+
+# Build outputs
+backend/dist/
+frontend-build/
+
+# Blockchain artifacts
+blockchain/artifacts/
+blockchain/cache/
+blockchain/typechain-types/
+
+# Contract deployment files (generated at runtime)
+backend/contract-info.json
+data/contract-info.json
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
