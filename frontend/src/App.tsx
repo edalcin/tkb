@@ -30,6 +30,20 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
+  // Detect if accessed via external IP and use appropriate API URL
+  const getApiUrl = (endpoint: string) => {
+    const isExternal = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+    
+    if (isExternal) {
+      // For external access, use direct backend URL
+      const externalApiUrl = process.env.REACT_APP_EXTERNAL_API_URL || `http://${window.location.hostname}:8112`;
+      return `${externalApiUrl}${endpoint}`;
+    } else {
+      // For local access, use proxy
+      return endpoint;
+    }
+  };
+
   useEffect(() => {
     fetchRecords();
   }, []);
@@ -37,7 +51,8 @@ function App() {
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/knowledge');
+      const apiUrl = getApiUrl('/api/knowledge');
+      const response = await fetch(apiUrl);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -53,7 +68,8 @@ function App() {
 
   const checkBackend = async () => {
     try {
-      const response = await fetch('/api/hello');
+      const apiUrl = getApiUrl('/api/hello');
+      const response = await fetch(apiUrl);
       const data = await response.json();
       alert(data.message);
     } catch (err) {
@@ -112,6 +128,18 @@ function App() {
             <p>🔄 Carregando registros...</p>
           </div>
         )}
+
+        <div style={{ 
+          backgroundColor: '#e3f2fd', 
+          color: '#0d47a1', 
+          padding: '0.5rem', 
+          borderRadius: '4px',
+          marginBottom: '1rem',
+          fontSize: '0.85rem'
+        }}>
+          📡 Conectando via: {window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? 
+            `IP Externo (${window.location.hostname}:8112)` : 'Localhost (proxy)'}
+        </div>
 
         {error && (
           <div style={{ 
