@@ -103,9 +103,12 @@ function App() {
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
       <header style={{ marginBottom: '2rem', textAlign: 'center' }}>
-        <h1 style={{ color: '#2c5f2d', marginBottom: '1rem' }}>
-          🌱 TKB - Traditional Knowledge Blockchain
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+          <img src="/tkb_icone250.png" alt="TKB Logo" style={{ width: '60px', height: '60px', marginRight: '1rem' }} />
+          <h1 style={{ color: '#2c5f2d', margin: 0 }}>
+            TKB - Traditional Knowledge Blockchain
+          </h1>
+        </div>
         <p style={{ color: '#666', fontSize: '1.1rem' }}>
           Plataforma para registro e proteção do conhecimento tradicional associado à biodiversidade
         </p>

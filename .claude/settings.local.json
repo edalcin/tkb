@@ -24,8 +24,12 @@
       "Bash(nslookup:*)",
       "Bash(mkdir:*)",
       "Bash(npx hardhat node:*)",
-      "Bash(npm start)",
-      "Bash(npm run build:*)"
+      "Bash(pnpm start)",
+      "Bash(pnpm run build:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm run start:*)",
+      "Bash(pnpm hardhat:*)",
+      "Bash(pnpm run dev:*)"
     ],
     "deny": [],
     "ask": []

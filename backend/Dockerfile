@@ -1,14 +1,17 @@
 # Use an official Node.js runtime as a parent image
 FROM node:18-alpine
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
-COPY package*.json ./
+# Copy package.json and pnpm-lock.yaml to the working directory
+COPY package.json pnpm-lock.yaml ./
 
 # Install any needed packages
-RUN npm install
+RUN pnpm install --frozen-lockfile
 
 # Bundle app source
 COPY . .
@@ -17,4 +20,4 @@ COPY . .
 EXPOSE 3001
 
 # Run the app when the container launches
-CMD ["npm", "run", "dev"]
+CMD ["pnpm", "run", "dev"]
