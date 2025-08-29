@@ -47,12 +47,33 @@ Primeiro, você precisa ter acesso a um terminal com Docker para construir a ima
     -   **Host Port:** `8080` (ou outra porta livre no seu Unraid que você queira usar para acessar a aplicação).
 
 5.  **Configure os Volumes (Paths):**
-    -   A aplicação usa o IPFS para armazenar dados, e é crucial que esses dados sejam persistentes (não se percam quando o contêiner for recriado).
+    -   A aplicação usa múltiplos diretórios para dados persistentes. Configure todos os volumes abaixo:
+    
+    **Volume 1 - Dados IPFS:**
     -   Clique em **Add another Path, Port, Variable, Label or Device**.
     -   **Config Type:** `Path`.
     -   **Name:** `IPFS Data`.
     -   **Container Path:** `/data/ipfs`.
-    -   **Host Path:** Escolha um caminho no seu Unraid para armazenar os dados do IPFS. Por exemplo: `/mnt/user/appdata/tkb-ipfs-data/`.
+    -   **Host Path:** `/mnt/user/appdata/tkb/ipfs-data/`.
+    
+    **Volume 2 - Dados da Aplicação:**
+    -   Clique em **Add another Path, Port, Variable, Label or Device**.
+    -   **Config Type:** `Path`.
+    -   **Name:** `Application Data`.
+    -   **Container Path:** `/app/data`.
+    -   **Host Path:** `/mnt/user/appdata/tkb/app-data/`.
+    
+    **Volume 3 - Logs do Sistema:**
+    -   Clique em **Add another Path, Port, Variable, Label or Device**.
+    -   **Config Type:** `Path`.
+    -   **Name:** `System Logs`.
+    -   **Container Path:** `/var/log/supervisor`.
+    -   **Host Path:** `/mnt/user/appdata/tkb/logs/`.
+
+    > **⚠️ Importante:** Todos os três volumes são essenciais:
+    > - **IPFS Data**: Armazena dados descentralizados (metadados, arquivos)
+    > - **Application Data**: Contém informações dos contratos blockchain (`contract-info.json`)
+    > - **System Logs**: Logs para debugging e monitoramento do sistema
 
 6.  **Aplique e Inicie.**
     -   Clique em **APPLY** para salvar o template e iniciar o contêiner.
