@@ -1,28 +1,10 @@
 # Instruções de Instalação no Unraid
 
-Este guia descreve como instalar a aplicação TKB como um contêiner Docker customizado no Unraid.
+Este guia descreve como instalar a aplicação TKB como um contêiner Docker customizado no Unraid usando a imagem oficial automaticamente construída.
 
-## Passo 1: Construir a Imagem Docker
+> **ℹ️ Imagem Oficial**: A imagem Docker é construída automaticamente pelo GitHub Actions a cada atualização do código e está disponível no GitHub Container Registry.
 
-Primeiro, você precisa ter acesso a um terminal com Docker para construir a imagem da aplicação. Esta imagem pode ser construída em sua máquina local e depois enviada para um registro de contêineres (como o Docker Hub), ou você pode usar o terminal do próprio Unraid se ele tiver as ferramentas de build.
-
-1.  Clone o repositório do projeto:
-    ```bash
-    git clone <URL_DO_SEU_REPOSITORIO_GIT>
-    ```
-2.  Navegue até o diretório do projeto e construa a imagem:
-    ```bash
-    cd tkb
-    docker build -t seu-usuario/tkb-app:latest .
-    ```
-    *Substitua `seu-usuario` pelo seu nome de usuário no Docker Hub.*
-
-3.  Envie a imagem para o Docker Hub:
-    ```bash
-    docker push seu-usuario/tkb-app:latest
-    ```
-
-## Passo 2: Instalar o Contêiner no Unraid
+## Passo 1: Instalar o Contêiner no Unraid
 
 1.  **Vá para a aba "Apps" no Unraid.**
     -   Procure e instale o template "Docker Custom" ou "Custom Docker App" se ainda não o tiver.
@@ -35,7 +17,7 @@ Primeiro, você precisa ter acesso a um terminal com Docker para construir a ima
 3.  **Configure o Template do Contêiner TKB:**
 
     -   **Name:** `TKB-App` (ou o nome que preferir).
-    -   **Repository:** `seu-usuario/tkb-app:latest` (a imagem que você enviou no Passo 1).
+    -   **Repository:** `ghcr.io/edalcin/tkb:latest` (imagem oficial construída automaticamente).
     -   **Network Type:** `Bridge`.
     -   **WebUI:** `http://[IP]:[PORT_8080]` (Isso criará um atalho na interface do Unraid).
 
@@ -78,6 +60,13 @@ Primeiro, você precisa ter acesso a um terminal com Docker para construir a ima
 6.  **Aplique e Inicie.**
     -   Clique em **APPLY** para salvar o template e iniciar o contêiner.
 
-## Passo 3: Acessar a Aplicação
+## Passo 2: Acessar a Aplicação
 
 Após o contêiner iniciar, você poderá acessar a interface web da aplicação TKB através do endereço do seu servidor Unraid na porta que você configurou (ex: `http://192.168.1.100:8080`).
+
+## Atualizações Automáticas
+
+A imagem `ghcr.io/edalcin/tkb:latest` é atualizada automaticamente a cada push no branch main do repositório. Para obter a versão mais recente:
+
+1. **Para atualizações manuais**: No Unraid, vá para a aba DOCKER, clique no contêiner TKB e selecione "Force Update"
+2. **Para uma versão específica**: Substitua `:latest` por uma tag de versão específica (ex: `:v1.0.0`) no campo Repository
