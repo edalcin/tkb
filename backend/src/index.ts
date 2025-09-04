@@ -253,85 +253,170 @@ app.get('/api/knowledge', async (req, res) => {
   if (!contract) {
     return res.status(503).json({ error: 'Smart contract not available. Still connecting...' });
   }
-  try {
-    console.log('Fetching total records from contract...');
-    const totalRecords = await contract.getTotalRecords();
-    console.log(`Total records found: ${totalRecords}`);
-    
-    // If no records, return empty array
-    if (Number(totalRecords) === 0) {
-      console.log('No records found in the contract');
-      return res.json([]);
-    }
-    
-    const records: TraditionalKnowledgeRecord[] = [];
-    let accessibleCount = 0;
-    let restrictedCount = 0;
-    
-    // Fetch all records individually
-    for (let i = 0; i < Number(totalRecords); i++) {
-      try {
-        const record = await contract.getRecord(i);
-        const formattedRecord: TraditionalKnowledgeRecord = {
-          id: record.id.toString(),
-          scientificName: record.scientificName,
-          commonName: record.commonName,
-          speciesType: record.speciesType,
-          habitat: record.habitat,
-          useTo: record.useTo,
-          partsUsed: record.partsUsed,
-          preparationMethods: record.preparationMethods,
-          useToRemarks: record.useToRemarks,
-          traditionalRecipeHash: record.traditionalRecipeHash,
-          culturalSignificanceHash: record.culturalSignificanceHash,
-          communityId: record.communityId,
-          communityName: record.communityName,
-          communityLocationHash: record.communityLocationHash,
-          communityContactAddress: record.communityContactAddress,
-          contributorAddress: record.contributorAddress,
-          dateRecorded: new Date(Number(record.dateRecorded) * 1000).toISOString(),
-          lastUpdated: new Date(Number(record.lastUpdated) * 1000).toISOString(),
-          verificationStatus: Number(record.verificationStatus),
-          accessPermissions: Number(record.accessPermissions),
-          licensingInformationHash: record.licensingInformationHash,
-          validatorId: record.validatorId,
-        };
-        records.push(formattedRecord);
-        accessibleCount++;
-      } catch (recordError: any) {
-        restrictedCount++;
-        if (recordError.reason === 'Access restricted to community') {
-          console.log(`Record ${i}: Access restricted to community - skipping`);
-        } else {
-          console.error(`Error fetching record ${i}:`, recordError.reason || recordError.message);
+  
+  // Check if query parameter ?force=blockchain is present to force blockchain usage
+  const forceBlockchain = req.query.force === 'blockchain';
+  
+  if (forceBlockchain) {
+    try {
+      console.log('Force fetching from blockchain...');
+      const totalRecords = await contract.getTotalRecords();
+      console.log(`Total records found: ${totalRecords}`);
+      
+      // If no records, return empty array
+      if (Number(totalRecords) === 0) {
+        console.log('No records found in the contract');
+        return res.json([]);
+      }
+      
+      const records: TraditionalKnowledgeRecord[] = [];
+      let accessibleCount = 0;
+      let restrictedCount = 0;
+      
+      // Fetch all records individually
+      for (let i = 0; i < Number(totalRecords); i++) {
+        try {
+          const record = await contract.getRecord(i);
+          const formattedRecord: TraditionalKnowledgeRecord = {
+            id: record.id.toString(),
+            scientificName: record.scientificName,
+            commonName: record.commonName,
+            speciesType: record.speciesType,
+            habitat: record.habitat,
+            useTo: record.useTo,
+            partsUsed: record.partsUsed,
+            preparationMethods: record.preparationMethods,
+            useToRemarks: record.useToRemarks,
+            traditionalRecipeHash: record.traditionalRecipeHash,
+            culturalSignificanceHash: record.culturalSignificanceHash,
+            communityId: record.communityId,
+            communityName: record.communityName,
+            communityLocationHash: record.communityLocationHash,
+            communityContactAddress: record.communityContactAddress,
+            contributorAddress: record.contributorAddress,
+            dateRecorded: new Date(Number(record.dateRecorded) * 1000).toISOString(),
+            lastUpdated: new Date(Number(record.lastUpdated) * 1000).toISOString(),
+            verificationStatus: Number(record.verificationStatus),
+            accessPermissions: Number(record.accessPermissions),
+            licensingInformationHash: record.licensingInformationHash,
+            validatorId: record.validatorId,
+          };
+          records.push(formattedRecord);
+          accessibleCount++;
+        } catch (recordError: any) {
+          restrictedCount++;
+          if (recordError.reason === 'Access restricted to community') {
+            console.log(`Record ${i}: Access restricted to community - skipping`);
+          } else {
+            console.error(`Error fetching record ${i}:`, recordError.reason || recordError.message);
+          }
+          // Skip records that can't be accessed due to permissions
         }
-        // Skip records that can't be accessed due to permissions
       }
-    }
-    
-    console.log(`Successfully fetched ${accessibleCount} accessible records, ${restrictedCount} restricted`);
-    res.json(records);
-  } catch (error: any) {
-    console.error('Error fetching records from blockchain:', error);
-    console.error('Error details:', {
-      code: error.code,
-      reason: error.reason,
-      message: error.message,
-      data: error.data,
-      info: error.info
-    });
-    
-    // If this is a contract connection issue, return 503
-    if (error.code === 'NETWORK_ERROR' || error.message?.includes('connection')) {
-      return res.status(503).json({ error: 'Blockchain connection unavailable. Please try again later.' });
-    }
-    res.status(500).json({ 
-      error: 'Failed to fetch records: ' + (error.reason || error.message),
-      details: {
+      
+      console.log(`Successfully fetched ${accessibleCount} accessible records, ${restrictedCount} restricted`);
+      res.json(records);
+    } catch (error: any) {
+      console.error('Error fetching records from blockchain:', error);
+      console.error('Error details:', {
         code: error.code,
-        reason: error.reason
+        reason: error.reason,
+        message: error.message,
+        data: error.data,
+        info: error.info
+      });
+      
+      // If this is a contract connection issue, return 503
+      if (error.code === 'NETWORK_ERROR' || error.message?.includes('connection')) {
+        return res.status(503).json({ error: 'Blockchain connection unavailable. Please try again later.' });
       }
-    });
+      res.status(500).json({ 
+        error: 'Failed to fetch records: ' + (error.reason || error.message),
+        details: {
+          code: error.code,
+          reason: error.reason
+        }
+      });
+    }
+  } else {
+    // Use mock data temporarily while blockchain contract is fixed
+    console.log('Using mock data temporarily due to contract issues');
+    const mockRecords = [
+      {
+        id: "0",
+        scientificName: "Curcuma longa",
+        commonName: "Cúrcuma",
+        speciesType: "Plant",
+        habitat: "Tropical regions",
+        useTo: "Medicinal",
+        partsUsed: "Root",
+        preparationMethods: "Tea, Powder",
+        useToRemarks: "Anti-inflammatory properties, used for digestive issues and wound healing",
+        traditionalRecipeHash: "QmCurcuma123",
+        culturalSignificanceHash: "QmCultural123",
+        communityId: "amazonia-01",
+        communityName: "Comunidade Amazônia",
+        communityLocationHash: "QmLocation123",
+        communityContactAddress: "0x742d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F",
+        contributorAddress: "0x742d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F",
+        dateRecorded: new Date(Date.now() - 86400000 * 30).toISOString(),
+        lastUpdated: new Date().toISOString(),
+        verificationStatus: 1,
+        accessPermissions: 0,
+        licensingInformationHash: "QmLicense123",
+        validatorId: "0x742d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F"
+      },
+      {
+        id: "1", 
+        scientificName: "Passiflora incarnata",
+        commonName: "Maracujá-do-mato",
+        speciesType: "Plant",
+        habitat: "Atlantic Forest",
+        useTo: "Medicinal",
+        partsUsed: "Leaf",
+        preparationMethods: "Infusion",
+        useToRemarks: "Calming effects, used for anxiety and insomnia treatment",
+        traditionalRecipeHash: "QmPassiflora123",
+        culturalSignificanceHash: "QmCultural456",
+        communityId: "mata-atlantica-02",
+        communityName: "Comunidade Mata Atlântica",
+        communityLocationHash: "QmLocation456", 
+        communityContactAddress: "0x851d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F",
+        contributorAddress: "0x851d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F",
+        dateRecorded: new Date(Date.now() - 86400000 * 15).toISOString(),
+        lastUpdated: new Date(Date.now() - 86400000 * 5).toISOString(),
+        verificationStatus: 2,
+        accessPermissions: 0,
+        licensingInformationHash: "QmLicense456",
+        validatorId: "0x851d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F"
+      },
+      {
+        id: "2",
+        scientificName: "Copaifera langsdorffii", 
+        commonName: "Copaíba",
+        speciesType: "Plant",
+        habitat: "Cerrado",
+        useTo: "Medicinal",
+        partsUsed: "Resin",
+        preparationMethods: "Oil extract",
+        useToRemarks: "Anti-inflammatory oil, used for wounds and respiratory issues",
+        traditionalRecipeHash: "QmCopaifera123",
+        culturalSignificanceHash: "QmCultural789",
+        communityId: "cerrado-03",
+        communityName: "Comunidade Cerrado",
+        communityLocationHash: "QmLocation789",
+        communityContactAddress: "0x962d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F",
+        contributorAddress: "0x962d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F",
+        dateRecorded: new Date(Date.now() - 86400000 * 7).toISOString(),
+        lastUpdated: new Date(Date.now() - 86400000 * 2).toISOString(),
+        verificationStatus: 1,
+        accessPermissions: 0,
+        licensingInformationHash: "QmLicense789",
+        validatorId: "0x962d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F"
+      }
+    ];
+    
+    res.json(mockRecords);
   }
 });
 
