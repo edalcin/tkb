@@ -31,13 +31,23 @@ function App() {
   const [error, setError] = useState<string>('');
 
   const getApiUrls = (endpoint: string) => {
-    // In production, the API is served from the same host.
-    // In development, we use the .env variable, falling back to localhost:3001.
-    const apiUrl = process.env.NODE_ENV === 'production'
-      ? '' // Use a relative path for production
-      : process.env.REACT_APP_API_URL || 'http://localhost:3001';
-
-    return [`${apiUrl}${endpoint}`];
+    // In production, try multiple API endpoints for better reliability
+    if (process.env.NODE_ENV === 'production') {
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol;
+      
+      // Try multiple possible API endpoints in order of preference
+      return [
+        `${endpoint}`, // Same-origin relative path (for proxy setups)
+        `${protocol}//${hostname}:8111${endpoint}`, // Unraid port mapping
+        `http://${hostname}:8111${endpoint}`, // Force HTTP for Unraid
+        `http://192.168.1.10:8111${endpoint}`, // Direct IP fallback
+      ];
+    } else {
+      // Development mode
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      return [`${apiUrl}${endpoint}`];
+    }
   };
 
   useEffect(() => {
