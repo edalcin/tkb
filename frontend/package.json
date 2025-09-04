@@ -2,6 +2,7 @@
   "name": "tkb-frontend",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.15.1",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
