@@ -180,6 +180,7 @@ app.get('/api/debug', async (req, res) => {
     contractAvailable: !!contract,
     contractAddress: null as string | null,
     hardhatConnection: null as string | null,
+    totalRecordsTest: null as string | null,
     timestamp: new Date().toISOString()
   };
   
@@ -187,6 +188,15 @@ app.get('/api/debug', async (req, res) => {
     try {
       debug.contractAddress = await contract.getAddress();
       debug.hardhatConnection = 'Connected';
+      
+      // Test getTotalRecords() directly
+      try {
+        const totalRecords = await contract.getTotalRecords();
+        debug.totalRecordsTest = `Success: ${totalRecords.toString()}`;
+      } catch (recordError: any) {
+        debug.totalRecordsTest = `Error: ${recordError.message}`;
+      }
+      
     } catch (err) {
       debug.hardhatConnection = err instanceof Error ? err.message : 'Unknown error';
     }
@@ -195,6 +205,48 @@ app.get('/api/debug', async (req, res) => {
   }
   
   res.json(debug);
+});
+
+// Force redeploy endpoint for debugging
+app.post('/api/redeploy', async (req, res) => {
+  try {
+    console.log('Force redeploying contract...');
+    await deployContract();
+    // Wait a bit and try to reconnect
+    setTimeout(connectToContract, 5000);
+    res.json({ message: 'Redeploy initiated. Check logs and /api/debug for status.' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Test endpoint with mock data
+app.get('/api/knowledge-test', async (req, res) => {
+  const mockRecord = {
+    id: "0",
+    scientificName: "Test Species",
+    commonName: "Test Plant",
+    speciesType: "Plant",
+    habitat: "Test Habitat",
+    useTo: "Medicinal",
+    partsUsed: "Leaf",
+    preparationMethods: "Tea",
+    useToRemarks: "Test usage for debugging",
+    traditionalRecipeHash: "QmTest123",
+    culturalSignificanceHash: "QmCultural123",
+    communityId: "test-community",
+    communityName: "Test Community",
+    communityLocationHash: "QmLocation123",
+    communityContactAddress: "0x742d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F",
+    contributorAddress: "0x742d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F",
+    dateRecorded: new Date().toISOString(),
+    lastUpdated: new Date().toISOString(),
+    verificationStatus: 0,
+    accessPermissions: 0,
+    licensingInformationHash: "QmLicense123",
+    validatorId: "0x742d35Cc6635C0532925a3b8D6f9E4e4E8BBf68F"
+  };
+  res.json([mockRecord]);
 });
 
 app.get('/api/knowledge', async (req, res) => {
