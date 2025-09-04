@@ -51,7 +51,7 @@ async function deployContract(): Promise<void> {
     console.log('Contract info not found. Attempting to deploy...');
     const deployProcess = exec(
       'npx hardhat run scripts/deploy.ts --network localhost',
-      { cwd: '/app' }
+      { cwd: '/app/blockchain' }
     );
 
     deployProcess.stdout?.on('data', (data) => console.log(`[Deploy Script]: ${data}`.trim()));
