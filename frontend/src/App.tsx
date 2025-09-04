@@ -165,16 +165,6 @@ function App() {
           </div>
         )}
 
-        <div style={{ 
-          backgroundColor: '#e3f2fd', 
-          color: '#0d47a1', 
-          padding: '0.5rem', 
-          borderRadius: '4px',
-          marginBottom: '1rem',
-          fontSize: '0.85rem'
-        }}>
-          📡 Hostname: {window.location.hostname} | Tentativas de API: {getApiUrls('/api/knowledge').map((url, i) => `${i+1}. ${url}`).join(' → ')}
-        </div>
 
         {error && (
           <div style={{ 

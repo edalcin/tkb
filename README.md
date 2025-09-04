@@ -63,7 +63,7 @@ Para simplificar a implantação e o gerenciamento, este projeto foi arquitetado
 docker run -d -p 8080:3001 --name tkb-container ghcr.io/edalcin/tkb:latest
 
 # 2. Deploy do smart contract e dados de teste
-docker exec tkb-container sh -c "cd /app/blockchain && npx hardhat run simple-deploy.js --network localhost"
+docker exec tkb-container sh -c "cd /app/blockchain && pnpm hardhat run scripts/deploy.ts --network localhost"
 
 # 3. Acessar a aplicação
 # Frontend: http://localhost:8080
@@ -84,7 +84,7 @@ docker build -t tkb-app .
 docker run -d -p 8080:3001 --name tkb-container tkb-app
 
 # 4. Deploy do smart contract e dados de teste
-docker exec tkb-container sh -c "cd /app/blockchain && npx hardhat run simple-deploy.js --network localhost"
+docker exec tkb-container sh -c "cd /app/blockchain && pnpm hardhat run scripts/deploy.ts --network localhost"
 
 # 5. Acessar a aplicação
 # Frontend: http://localhost:8080
@@ -111,6 +111,98 @@ docker stop tkb-container && docker rm tkb-container
 
 # Remover a imagem
 docker rmi tkb-app
+```
+
+### 🏠 Opção 3: Instalação no UNRAID
+
+Para usuários do **UNRAID**, a instalação pode ser feita através da interface web:
+
+#### 📋 **Configuração Docker no UNRAID**
+
+**Via Terminal (Comando Completo):**
+```bash
+docker run \
+  -d \
+  --name='tkb' \
+  --net='bridge' \
+  --pids-limit 2048 \
+  -e TZ="America/Sao_Paulo" \
+  -e HOST_OS="Unraid" \
+  -e HOST_HOSTNAME="Asilo" \
+  -e HOST_CONTAINERNAME="tkb" \
+  -l net.unraid.docker.managed=dockerman \
+  -l net.unraid.docker.webui='http://192.168.1.10:8111' \
+  -l net.unraid.docker.icon='dalcinweb.s3-website-us-east-1.amazonaws.com/imgsGeral/tkb250t.png' \
+  -p '8111:3001/tcp' \
+  -v '/mnt/user/Storage/appsdata/tkb/ipfs-data/':'/data/ipfs':'rw' \
+  -v '/mnt/user/Storage/appsdata/tkb/app-data/':'/app/data':'rw' \
+  -v '/mnt/user/Storage/appsdata/tkb/logs/':'/var/log/supervisor':'rw' \
+  'ghcr.io/edalcin/tkb:latest'
+```
+
+**Via Interface Web UNRAID:**
+
+**1. Configuração Básica:**
+- **Container Name:** `tkb`
+- **Repository:** `ghcr.io/edalcin/tkb:latest`
+- **Network Type:** `bridge`
+- **Console Shell Command:** Bash
+- **Privileged:** No
+- **PID Limit:** `2048`
+
+**2. Port Mapping:**
+- **Container Port:** `3001`
+- **Host Port:** `8111`
+- **Connection Type:** TCP
+
+**3. Volume Mappings:**
+- **Container Path:** `/data/ipfs` → **Host Path:** `/mnt/user/Storage/appsdata/tkb/ipfs-data/` (Read/Write)
+- **Container Path:** `/app/data` → **Host Path:** `/mnt/user/Storage/appsdata/tkb/app-data/` (Read/Write)
+- **Container Path:** `/var/log/supervisor` → **Host Path:** `/mnt/user/Storage/appsdata/tkb/logs/` (Read/Write)
+
+**4. Environment Variables:**
+- `TZ=America/Sao_Paulo`
+- `HOST_OS=Unraid`
+- `HOST_HOSTNAME=Asilo`
+- `HOST_CONTAINERNAME=tkb`
+
+**5. Labels (Opcional):**
+- `net.unraid.docker.managed=dockerman`
+- `net.unraid.docker.webui=http://192.168.1.10:8111`
+- `net.unraid.docker.icon=dalcinweb.s3-website-us-east-1.amazonaws.com/imgsGeral/tkb250t.png`
+
+#### ⚡ **Comando de Deploy Obrigatório**
+
+**IMPORTANTE:** Após iniciar o container no UNRAID, você **DEVE** executar este comando no terminal do UNRAID para deployar os smart contracts e popular dados de exemplo:
+
+```bash
+docker exec tkb sh -c "cd /app/blockchain && pnpm hardhat run scripts/deploy.ts --network localhost"
+```
+
+Este comando é **essencial** para o funcionamento da aplicação, pois:
+- ✅ Deploy dos smart contracts na blockchain local
+- ✅ População de dados de exemplo no contrato
+- ✅ Criação do arquivo de configuração (`contract-info.json`)
+- ✅ Inicialização completa do sistema blockchain
+
+**5. Acessar a Aplicação:**
+- **Interface Web:** `http://[IP-DO-UNRAID]:8111`
+- **API Status:** `http://[IP-DO-UNRAID]:8111/api/hello`
+- **Dados:** `http://[IP-DO-UNRAID]:8111/api/knowledge`
+
+#### 🛠️ **Troubleshooting UNRAID**
+
+Se a aplicação mostrar "Carregando registros..." indefinidamente:
+
+```bash
+# 1. Verificar logs do container
+docker logs tkb
+
+# 2. Re-executar deploy (comando obrigatório)
+docker exec tkb sh -c "cd /app/blockchain && pnpm hardhat run scripts/deploy.ts --network localhost"
+
+# 3. Verificar status da blockchain
+docker exec tkb sh -c "curl http://localhost:3001/api/debug"
 ```
 
 ## 📊 Funcionalidades
@@ -208,10 +300,10 @@ docker exec tkb-container cat /var/log/supervisor/backend_stdout.log
 docker exec tkb-container cat /var/log/supervisor/hardhat.log
 
 # Deploy manual do contrato
-docker exec tkb-container sh -c "cd /app/blockchain && npx hardhat run simple-deploy.js --network localhost"
+docker exec tkb-container sh -c "cd /app/blockchain && pnpm hardhat run scripts/deploy.ts --network localhost"
 
 # Teste direto do contrato
-docker exec tkb-container sh -c "cd /app/blockchain && npx hardhat run test-contract.js --network localhost"
+docker exec tkb-container sh -c "cd /app/blockchain && pnpm hardhat run scripts/deploy.ts --network localhost"
 ```
 
 ### Dados de Teste
@@ -229,7 +321,7 @@ A aplicação vem com dados de teste pré-configurados representando conheciment
 1. **Contrato não encontrado:**
    ```bash
    # Execute o deploy novamente
-   docker exec tkb-container sh -c "cd /app/blockchain && npx hardhat run simple-deploy.js --network localhost"
+   docker exec tkb-container sh -c "cd /app/blockchain && pnpm hardhat run scripts/deploy.ts --network localhost"
    ```
 
 2. **API retorna erro 503:**
