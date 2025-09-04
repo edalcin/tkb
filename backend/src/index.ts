@@ -178,8 +178,8 @@ app.get('/api/cors-test', (req, res) => {
 app.get('/api/debug', async (req, res) => {
   const debug = {
     contractAvailable: !!contract,
-    contractAddress: null,
-    hardhatConnection: null,
+    contractAddress: null as string | null,
+    hardhatConnection: null as string | null,
     timestamp: new Date().toISOString()
   };
   
