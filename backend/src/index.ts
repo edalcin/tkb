@@ -174,6 +174,29 @@ app.get('/api/cors-test', (req, res) => {
   });
 });
 
+// Debug endpoint to check blockchain connection status
+app.get('/api/debug', async (req, res) => {
+  const debug = {
+    contractAvailable: !!contract,
+    contractAddress: null,
+    hardhatConnection: null,
+    timestamp: new Date().toISOString()
+  };
+  
+  if (contract) {
+    try {
+      debug.contractAddress = await contract.getAddress();
+      debug.hardhatConnection = 'Connected';
+    } catch (err) {
+      debug.hardhatConnection = err instanceof Error ? err.message : 'Unknown error';
+    }
+  } else {
+    debug.hardhatConnection = 'Contract not initialized';
+  }
+  
+  res.json(debug);
+});
+
 app.get('/api/knowledge', async (req, res) => {
   if (!contract) {
     return res.status(503).json({ error: 'Smart contract not available. Still connecting...' });
