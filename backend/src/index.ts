@@ -139,6 +139,8 @@ const allowedOrigins = [
   'http://192.168.1.10:8113',
   'http://tkb.dalc.in:8111',
   'http://tkb.dalc.in:8113',
+  'https://tkb.dalc.in',
+  'http://tkb.dalc.in',
 ];
 app.use(cors({
   origin: (origin, callback) => {
