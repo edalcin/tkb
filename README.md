@@ -128,15 +128,15 @@ docker run \
   --pids-limit 2048 \
   -e TZ="America/Sao_Paulo" \
   -e HOST_OS="Unraid" \
-  -e HOST_HOSTNAME="Asilo" \
+  -e HOST_HOSTNAME="YourServerName" \
   -e HOST_CONTAINERNAME="tkb" \
   -l net.unraid.docker.managed=dockerman \
-  -l net.unraid.docker.webui='http://192.168.1.10:8111' \
-  -l net.unraid.docker.icon='dalcinweb.s3-website-us-east-1.amazonaws.com/imgsGeral/tkb250t.png' \
+  -l net.unraid.docker.webui='http://YOUR_UNRAID_IP:8111' \
+  -l net.unraid.docker.icon='https://raw.githubusercontent.com/edalcin/tkb/main/images/tkbt.png' \
   -p '8111:3001/tcp' \
-  -v '/mnt/user/Storage/appsdata/tkb/ipfs-data/':'/data/ipfs':'rw' \
-  -v '/mnt/user/Storage/appsdata/tkb/app-data/':'/app/data':'rw' \
-  -v '/mnt/user/Storage/appsdata/tkb/logs/':'/var/log/supervisor':'rw' \
+  -v '/mnt/user/appdata/tkb/ipfs-data/':'/data/ipfs':'rw' \
+  -v '/mnt/user/appdata/tkb/app-data/':'/app/data':'rw' \
+  -v '/mnt/user/appdata/tkb/logs/':'/var/log/supervisor':'rw' \
   'ghcr.io/edalcin/tkb:latest'
 ```
 
@@ -156,20 +156,20 @@ docker run \
 - **Connection Type:** TCP
 
 **3. Volume Mappings:**
-- **Container Path:** `/data/ipfs` → **Host Path:** `/mnt/user/Storage/appsdata/tkb/ipfs-data/` (Read/Write)
-- **Container Path:** `/app/data` → **Host Path:** `/mnt/user/Storage/appsdata/tkb/app-data/` (Read/Write)
-- **Container Path:** `/var/log/supervisor` → **Host Path:** `/mnt/user/Storage/appsdata/tkb/logs/` (Read/Write)
+- **Container Path:** `/data/ipfs` → **Host Path:** `/mnt/user/appdata/tkb/ipfs-data/` (Read/Write)
+- **Container Path:** `/app/data` → **Host Path:** `/mnt/user/appdata/tkb/app-data/` (Read/Write)
+- **Container Path:** `/var/log/supervisor` → **Host Path:** `/mnt/user/appdata/tkb/logs/` (Read/Write)
 
 **4. Environment Variables:**
-- `TZ=America/Sao_Paulo`
+- `TZ=America/Sao_Paulo` (ajuste para seu timezone)
 - `HOST_OS=Unraid`
-- `HOST_HOSTNAME=Asilo`
+- `HOST_HOSTNAME=YourServerName` (nome do seu servidor)
 - `HOST_CONTAINERNAME=tkb`
 
 **5. Labels (Opcional):**
 - `net.unraid.docker.managed=dockerman`
-- `net.unraid.docker.webui=http://192.168.1.10:8111`
-- `net.unraid.docker.icon=dalcinweb.s3-website-us-east-1.amazonaws.com/imgsGeral/tkb250t.png`
+- `net.unraid.docker.webui=http://YOUR_UNRAID_IP:8111`
+- `net.unraid.docker.icon=https://raw.githubusercontent.com/edalcin/tkb/main/images/tkbt.png`
 
 #### ⚡ **Comando de Deploy Obrigatório**
 
@@ -186,9 +186,11 @@ Este comando é **essencial** para o funcionamento da aplicação, pois:
 - ✅ Inicialização completa do sistema blockchain
 
 **5. Acessar a Aplicação:**
-- **Interface Web:** `http://[IP-DO-UNRAID]:8111`
-- **API Status:** `http://[IP-DO-UNRAID]:8111/api/hello`
-- **Dados:** `http://[IP-DO-UNRAID]:8111/api/knowledge`
+- **Interface Web:** `http://YOUR_UNRAID_IP:8111`
+- **API Status:** `http://YOUR_UNRAID_IP:8111/api/hello`
+- **Dados:** `http://YOUR_UNRAID_IP:8111/api/knowledge`
+
+> **Nota:** Substitua `YOUR_UNRAID_IP` pelo IP real do seu servidor UNRAID (ex: 192.168.1.100)
 
 #### 🛠️ **Troubleshooting UNRAID**
 
