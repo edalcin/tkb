@@ -104,10 +104,10 @@ async function connectToContract() {
       throw lastError || new Error('Failed to connect to any Hardhat RPC URL');
     }
     
-    // Create contract instance with minimal ABI for the methods we need
+    // Create contract instance with correct ABI for the methods we need
     const abi = [
       "function getTotalRecords() view returns (uint256)",
-      "function getRecord(uint256) view returns (tuple(uint256 id, string scientificName, string commonName, string speciesType, string habitat, string useTo, string partsUsed, string preparationMethods, string useToRemarks, string traditionalRecipeHash, string culturalSignificanceHash, string communityId, string communityName, string communityLocationHash, address communityContactAddress, address contributorAddress, uint256 dateRecorded, uint256 lastUpdated, uint8 verificationStatus, uint8 accessPermissions, string licensingInformationHash, address validatorId))"
+      "function getRecord(uint256 recordId) view returns (tuple(uint256 id, string scientificName, string commonName, string speciesType, string habitat, string useTo, string partsUsed, string preparationMethods, string useToRemarks, string traditionalRecipeHash, string culturalSignificanceHash, string communityId, string communityName, string communityLocationHash, address communityContactAddress, address contributorAddress, uint256 dateRecorded, uint256 lastUpdated, uint8 verificationStatus, uint8 accessPermissions, string licensingInformationHash, address validatorId))"
     ];
     
     contract = new ethers.Contract(registryAddress, abi, provider);
@@ -205,6 +205,13 @@ app.get('/api/knowledge', async (req, res) => {
     console.log('Fetching total records from contract...');
     const totalRecords = await contract.getTotalRecords();
     console.log(`Total records found: ${totalRecords}`);
+    
+    // If no records, return empty array
+    if (Number(totalRecords) === 0) {
+      console.log('No records found in the contract');
+      return res.json([]);
+    }
+    
     const records: TraditionalKnowledgeRecord[] = [];
     let accessibleCount = 0;
     let restrictedCount = 0;
@@ -254,11 +261,25 @@ app.get('/api/knowledge', async (req, res) => {
     res.json(records);
   } catch (error: any) {
     console.error('Error fetching records from blockchain:', error);
+    console.error('Error details:', {
+      code: error.code,
+      reason: error.reason,
+      message: error.message,
+      data: error.data,
+      info: error.info
+    });
+    
     // If this is a contract connection issue, return 503
     if (error.code === 'NETWORK_ERROR' || error.message?.includes('connection')) {
       return res.status(503).json({ error: 'Blockchain connection unavailable. Please try again later.' });
     }
-    res.status(500).json({ error: 'Failed to fetch records: ' + (error.reason || error.message) });
+    res.status(500).json({ 
+      error: 'Failed to fetch records: ' + (error.reason || error.message),
+      details: {
+        code: error.code,
+        reason: error.reason
+      }
+    });
   }
 });
 
